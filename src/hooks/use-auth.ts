@@ -5,6 +5,7 @@ import { apiClient } from '@/lib/api-client';
 export interface LoginPayload {
     email: string;
     password: string;
+    role: string;
 }
 
 export interface RegisterPayload {
@@ -18,6 +19,12 @@ export interface AuthUser {
     name: string;
     email: string;
     role: string;
+    isActive: boolean;
+}
+
+export interface AuthResponse {
+    access_token: string;
+    user: AuthUser;
 }
 
 // --- Hooks ---
@@ -29,10 +36,13 @@ export const useLogin = () => {
     return useMutation({
         mutationFn: async (payload: LoginPayload) => {
             const { data } = await apiClient.post('/auth/login', payload);
-            return data as { access_token: string };
+            return data as AuthResponse;
         },
         onSuccess: (data) => {
             localStorage.setItem('access_token', data.access_token);
+            if (data.user) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+            }
             queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
