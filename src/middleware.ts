@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_ROUTES = ['/auth', '/auth/login'];
+const PUBLIC_ROUTES = ['/auth', '/auth/role-selection', '/auth/login'];
 const PROTECTED_PREFIX = '/dashboard';
 
 export function middleware(request: NextRequest) {
