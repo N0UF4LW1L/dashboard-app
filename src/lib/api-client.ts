@@ -31,7 +31,7 @@ apiClient.interceptors.response.use(
         // Jika 401 Unauthorized, hapus token dan redirect ke login
         if (error.response?.status === 401 && typeof window !== 'undefined') {
             localStorage.removeItem('access_token');
-            window.location.href = '/login';
+            window.location.href = '/auth';
         }
 
         return Promise.reject(new Error(message));

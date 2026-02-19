@@ -17,7 +17,7 @@ export default function DashboardPage() {
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token) {
-            router.push('/login');
+            router.push('/auth');
             return;
         }
         const userStr = localStorage.getItem('user');
@@ -34,7 +34,7 @@ export default function DashboardPage() {
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
         document.cookie = 'access_token=; path=/; max-age=0';
-        router.push('/login');
+        router.push('/auth');
     };
 
     return (

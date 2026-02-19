@@ -78,6 +78,6 @@ export const useLogout = () => {
     return () => {
         localStorage.removeItem('access_token');
         queryClient.clear();
-        window.location.href = '/login';
+        window.location.href = '/auth';
     };
 };

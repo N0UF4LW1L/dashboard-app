@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_ROUTES = ['/login'];
+const PUBLIC_ROUTES = ['/auth', '/auth/login'];
 const PROTECTED_PREFIX = '/dashboard';
 
 export function middleware(request: NextRequest) {
@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
 
     // Jika belum login dan akses halaman protected, redirect ke login
     if (isProtectedRoute && !token) {
-        return NextResponse.redirect(new URL('/login', request.url));
+        return NextResponse.redirect(new URL('/auth', request.url));
     }
 
     return NextResponse.next();
