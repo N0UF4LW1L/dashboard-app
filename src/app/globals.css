@@ -124,3 +124,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom color: main = #1F61D9 (same as REFERENSI tailwind config) */
+@layer utilities {
+  .text-main {
+    color: #1F61D9;
+  }
+  .bg-main {
+    background-color: #1F61D9;
+  }
+  .border-main {
+    border-color: #1F61D9;
+  }
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .h-screen {
+    height: 100vh;
+    height: 100dvh;
+  }
+}
