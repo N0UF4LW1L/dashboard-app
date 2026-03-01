@@ -6,24 +6,22 @@ import VehicleStatusCard from '@/components/vehicle-status-card';
 import Welcome from '@/components/welcome-text';
 import { useUser } from '@/context/user-context';
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function Page() {
     const { user, setUser } = useUser();
-    const router = useRouter();
 
     useEffect(() => {
-        // Sync user dari localStorage jika context kosong
+        // Sync user dari localStorage jika context kosong — hanya jalan sekali saat mount
         const stored = localStorage.getItem('user');
         if (stored && !user) {
             try { setUser(JSON.parse(stored)); } catch { /* ignore */ }
         }
-        // Guard: jika tidak ada token, redirect ke login
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-            router.push('/auth');
-        }
-    }, [user, setUser, router]);
+        // CATATAN: guard auth (redirect ke /auth jika tidak login) dilakukan oleh
+        // middleware.ts via cookie — tidak perlu cek localStorage di sini.
+        // Pengecekan localStorage di sini justru memicu loop karena bisa mismatch
+        // dengan cookie yang dipakai middleware.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Hanya jalan sekali saat mount
 
     return (
         <>

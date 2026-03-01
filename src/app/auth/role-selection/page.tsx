@@ -50,8 +50,13 @@ export default function RoleSelectionPage() {
     useEffect(() => {
         setMounted(true);
         const token = localStorage.getItem('access_token');
-        if (token) router.push('/dashboard');
-    }, [router]);
+        if (token) {
+            // Sync cookie dari localStorage jika cookie hilang (cegah middleware loop)
+            document.cookie = `access_token=${token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+            router.push('/dashboard');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Hanya jalan sekali saat mount — jangan taruh router di sini!
 
     const handleRoleSelect = (role: RoleConfig) => {
         router.push(`/auth/login?role=${role.key}`);
@@ -141,21 +146,6 @@ export default function RoleSelectionPage() {
                     </p>
                 </div>
             </div>
-
-            <style jsx>{`
-                @keyframes fade-in {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes fade-in-delay {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes fade-in-card {
-                    from { opacity: 0; transform: translateY(20px) scale(0.95); }
-                    to   { opacity: 1; transform: translateY(0) scale(1); }
-                }
-            `}</style>
         </div>
     );
 }

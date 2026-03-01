@@ -73,8 +73,13 @@ function LoginFormContent() {
             return;
         }
         const token = localStorage.getItem('access_token');
-        if (token) router.push('/dashboard');
-    }, [router, roleParam]);
+        if (token) {
+            // Sync cookie jika hilang, lalu redirect
+            document.cookie = `access_token=${token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+            router.push('/dashboard');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Hanya jalan sekali saat mount
 
     const handleBack = () => router.push('/auth/role-selection');
 
@@ -89,7 +94,6 @@ function LoginFormContent() {
                     document.cookie = `access_token=${data.access_token}; path=/; max-age=${7 * 24 * 60 * 60}`;
                     if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
                     router.push(DEFAULT_ROUTE[selectedRole.key]);
-                    router.refresh();
                 },
             }
         );
@@ -253,33 +257,6 @@ function LoginFormContent() {
                     </div>
                 </div>
             </div>
-
-            <style jsx>{`
-                @keyframes fade-in {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes slide-up {
-                    from { opacity: 0; transform: translateY(30px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes scale-in {
-                    from { opacity: 0; transform: scale(0.8); }
-                    to   { opacity: 1; transform: scale(1); }
-                }
-                @keyframes spin-slow {
-                    from { transform: rotate(0deg); }
-                    to   { transform: rotate(360deg); }
-                }
-                @keyframes spin-slow-reverse {
-                    from { transform: rotate(360deg); }
-                    to   { transform: rotate(0deg); }
-                }
-                @keyframes expand-width {
-                    from { width: 0; }
-                    to   { width: 4rem; }
-                }
-            `}</style>
         </>
     );
 }
