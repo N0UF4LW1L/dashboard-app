@@ -96,7 +96,7 @@ export default function VehicleFormModal({
             <div className="bg-background rounded-2xl shadow-2xl w-full max-w-md mx-4 border overflow-hidden"
                 style={{ animation: 'scale-in 0.2s ease-out' }}>
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-[#1F61D9] to-blue-700">
+                <div className="flex items-center justify-between px-6 py-4 border-b bg-linear-to-r from-[#1F61D9] to-blue-700">
                     <div className="flex items-center gap-3 text-white">
                         <Truck className="h-5 w-5" />
                         <h2 className="text-lg font-semibold">

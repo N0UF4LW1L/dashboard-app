@@ -65,7 +65,7 @@ export default function RoleSelectionPage() {
     if (!mounted) return null;
 
     return (
-        <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 h-screen overflow-hidden px-4 relative">
+        <div className="bg-linear-to-br from-blue-50 via-white to-blue-50 h-screen overflow-hidden px-4 relative">
             {/* Background decorative elements */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-20 w-32 h-32 bg-blue-100 rounded-full opacity-20 animate-pulse"></div>
@@ -132,7 +132,7 @@ export default function RoleSelectionPage() {
                                     </p>
 
                                     {/* Bottom bar indicator */}
-                                    <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                                    <div className="absolute bottom-0 left-0 w-full h-1 bg-linear-to-r from-blue-400 to-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
                                 </CardContent>
                             </Card>
                         );

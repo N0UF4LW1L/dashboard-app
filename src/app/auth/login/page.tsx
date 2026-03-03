@@ -115,7 +115,7 @@ function LoginFormContent() {
                 </div>
 
                 {/* ── Left Panel — Blue ── */}
-                <div className="w-full md:w-2/5 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex flex-col justify-center items-center relative py-12 md:py-0 overflow-hidden">
+                <div className="w-full md:w-2/5 bg-linear-to-br from-blue-600 via-blue-700 to-blue-800 flex flex-col justify-center items-center relative py-12 md:py-0 overflow-hidden">
                     {/* Back button */}
                     <Button
                         variant="ghost"
@@ -149,7 +149,7 @@ function LoginFormContent() {
                         {/* Welcome text */}
                         <div className="space-y-2 md:space-y-3">
                             <h2
-                                className="text-xl md:text-2xl font-bold mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent drop-shadow-lg"
+                                className="text-xl md:text-2xl font-bold mb-2 bg-linear-to-r from-white to-blue-100 bg-clip-text text-transparent drop-shadow-lg"
                                 style={{ animation: 'slide-up 0.6s ease-out' }}
                             >
                                 SELAMAT DATANG,
@@ -176,10 +176,10 @@ function LoginFormContent() {
                 </div>
 
                 {/* ── Right Panel — White ── */}
-                <div className="w-full md:w-3/5 bg-gradient-to-br from-white via-blue-50/30 to-white flex flex-col justify-center items-center p-6 md:p-12 relative">
+                <div className="w-full md:w-3/5 bg-linear-to-br from-white via-blue-50/30 to-white flex flex-col justify-center items-center p-6 md:p-12 relative">
                     <div className="w-full max-w-md relative z-10">
                         <div className="text-center mb-8" style={{ animation: 'fade-in 0.8s ease-out' }}>
-                            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-1">
+                            <h1 className="text-2xl md:text-3xl font-bold bg-linear-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-1">
                                 LOGIN KE DASHBOARD
                             </h1>
                             <p className="text-gray-500 text-sm">Masukkan kredensial Anda untuk melanjutkan</p>
@@ -242,7 +242,7 @@ function LoginFormContent() {
                             <Button
                                 type="submit"
                                 disabled={loginMutation.isPending || !email || !password}
-                                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 text-lg font-semibold uppercase transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                                className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 text-lg font-semibold uppercase transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                             >
                                 {loginMutation.isPending ? (
                                     <div className="flex items-center justify-center">

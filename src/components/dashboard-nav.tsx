@@ -59,7 +59,7 @@ export function DashboardNav({
                     <span className="mr-2 truncate font-semibold text-lg">Menu</span>
                 )}
                 <div
-                    className="border border-neutral-200 p-2 bg-neutral-50 rounded-md cursor-pointer flex-shrink-0"
+                    className="border border-neutral-200 p-2 bg-neutral-50 rounded-md cursor-pointer shrink-0"
                     onClick={toggle}
                 >
                     {isMinimized ? (
@@ -159,10 +159,10 @@ export function DashboardNav({
                                                         active ? 'bg-[#EDEFF3] text-[#1F61D9]' : '',
                                                         subItem.disabled && 'cursor-not-allowed opacity-80',
                                                     )}>
-                                                        <SubIcon className="h-4 w-4 flex-shrink-0" />
+                                                        <SubIcon className="h-4 w-4 shrink-0" />
                                                         <div className="flex items-center justify-between w-full min-w-0">
                                                             <span className="ml-2 truncate">{subItem.title}</span>
-                                                            <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                                                            <div className="flex items-center gap-1 shrink-0 ml-1">
                                                                 {subItem.title === 'Pesanan Kendaraan' && (
                                                                     <span className="bg-red-500 text-xs font-medium min-w-[20px] h-5 flex items-center justify-center rounded-md text-white px-1">
                                                                         {orderCount?.[0]?.count ?? 0}
