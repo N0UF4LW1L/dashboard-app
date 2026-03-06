@@ -60,39 +60,24 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
     const { data: customers = [], isLoading: loadingCustomers } = useGetCustomers();
     const { data: vehicles = [], isLoading: loadingVehicles } = useGetVehicles();
 
+    const formStartDate = initialData?.startDate?.split('T')[0] || '';
+    const formRentalDays = initialData?.rentalDays?.toString() || '';
+    const formEndDate = initialData ? computeEndDate(formStartDate, formRentalDays) : '';
+
     const [form, setForm] = useState({
-        customerId: '',
-        vehicleId: '',
-        rentalDays: '',
-        startDate: '',
-        endDate: '',
-        usageArea: 'Dalam Kota',
-        insuranceFee: '',
-        pickupFee: '',
-        additionalItems: '',
-        paymentStatus: 'Belum Lunas',
+        customerId: initialData?.customer?.id || initialData?.customerId || '',
+        vehicleId: initialData?.vehicle?.id || initialData?.vehicleId || '',
+        rentalDays: formRentalDays,
+        startDate: formStartDate,
+        endDate: formEndDate,
+        usageArea: initialData?.usageArea || 'Dalam Kota',
+        insuranceFee: initialData?.insuranceFee?.toString() || '',
+        pickupFee: initialData?.pickupFee?.toString() || '',
+        additionalItems: initialData?.additionalItems || '',
+        paymentStatus: initialData?.paymentStatus || 'Belum Lunas',
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
-
-    useEffect(() => {
-        if (initialData) {
-            const sd = initialData.startDate?.split('T')[0] || '';
-            const rd = initialData.rentalDays?.toString() || '';
-            setForm({
-                customerId: initialData.customer?.id || initialData.customerId || '',
-                vehicleId: initialData.vehicle?.id || initialData.vehicleId || '',
-                rentalDays: rd,
-                startDate: sd,
-                endDate: computeEndDate(sd, rd),
-                usageArea: initialData.usageArea || 'Dalam Kota',
-                insuranceFee: initialData.insuranceFee?.toString() || '',
-                pickupFee: initialData.pickupFee?.toString() || '',
-                additionalItems: initialData.additionalItems || '',
-                paymentStatus: initialData.paymentStatus || 'Belum Lunas',
-            });
-        }
-    }, [initialData]);
 
     const validate = () => {
         const errs: Record<string, string> = {};

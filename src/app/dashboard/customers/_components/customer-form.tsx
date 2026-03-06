@@ -32,18 +32,12 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ initialData }) => {
     const createMutation = useCreateCustomer();
     const updateMutation = useUpdateCustomer(initialData?.id ?? '');
 
-    const [form, setForm] = useState({ name: '', phoneNumber: '', email: '' });
+    const [form, setForm] = useState({
+        name: initialData?.name || '',
+        phoneNumber: initialData?.phoneNumber || '',
+        email: initialData?.email || '',
+    });
     const [errors, setErrors] = useState<Record<string, string>>({});
-
-    useEffect(() => {
-        if (initialData) {
-            setForm({
-                name: initialData.name,
-                phoneNumber: initialData.phoneNumber,
-                email: initialData.email,
-            });
-        }
-    }, [initialData]);
 
     const validate = () => {
         const errs: Record<string, string> = {};

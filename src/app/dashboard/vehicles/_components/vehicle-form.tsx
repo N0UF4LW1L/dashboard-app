@@ -53,21 +53,11 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
     const updateMutation = useUpdateVehicle(initialData?.id ?? '');
 
     const [form, setForm] = useState({
-        name: '',
-        rentalPrice: '',
-        type: '',
+        name: initialData?.name || '',
+        rentalPrice: initialData?.rentalPrice ? String(initialData.rentalPrice) : '',
+        type: initialData?.type || '',
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
-
-    useEffect(() => {
-        if (initialData) {
-            setForm({
-                name: initialData.name,
-                rentalPrice: String(initialData.rentalPrice),
-                type: initialData.type,
-            });
-        }
-    }, [initialData]);
 
     const validate = () => {
         const errs: Record<string, string> = {};
