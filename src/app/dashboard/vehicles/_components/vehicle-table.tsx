@@ -9,7 +9,7 @@ import {
     getPaginationRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -42,7 +42,6 @@ interface Vehicle {
     name: string;
     rentalPrice: number;
     type: string;
-    isAvailable: boolean;
 }
 
 interface VehicleTableProps {
@@ -75,21 +74,6 @@ const columns: ColumnDef<Vehicle>[] = [
         ),
     },
     {
-        accessorKey: 'isAvailable',
-        header: 'Status',
-        cell: ({ row }) => (
-            <span
-                className={
-                    row.original.isAvailable
-                        ? 'bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-xl'
-                        : 'bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-xl'
-                }
-            >
-                {row.original.isAvailable ? 'Tersedia' : 'Tidak Tersedia'}
-            </span>
-        ),
-    },
-    {
         id: 'actions',
         cell: ({ row }) => <VehicleCellAction data={row.original} />,
     },
@@ -101,28 +85,19 @@ export default function VehicleTable({
     pageSizeOptions = [10, 20, 30, 40, 50],
 }: VehicleTableProps) {
     const [searchQuery, setSearchQuery] = React.useState('');
-    const [statusFilter, setStatusFilter] = React.useState('all');
 
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
     });
 
-    // Filter data berdasarkan search dan status
+    // Filter data berdasarkan search
     const filteredData = React.useMemo(() => {
-        let result = data;
-        if (searchQuery) {
-            result = result.filter((v) =>
-                v.name.toLowerCase().includes(searchQuery.toLowerCase()),
-            );
-        }
-        if (statusFilter === 'available') {
-            result = result.filter((v) => v.isAvailable);
-        } else if (statusFilter === 'unavailable') {
-            result = result.filter((v) => !v.isAvailable);
-        }
-        return result;
-    }, [data, searchQuery, statusFilter]);
+        if (!searchQuery) return data;
+        return data.filter((v) =>
+            v.name.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
+    }, [data, searchQuery]);
 
     const table = useReactTable({
         data: filteredData,
@@ -155,24 +130,6 @@ export default function VehicleTable({
                     }}
                     className="w-full md:max-w-sm"
                 />
-                <div className="flex flex-col gap-2 md:flex-row md:gap-4">
-                    <Select
-                        value={statusFilter}
-                        onValueChange={(v) => {
-                            setStatusFilter(v);
-                            setPagination((p) => ({ ...p, pageIndex: 0 }));
-                        }}
-                    >
-                        <SelectTrigger className="w-full md:w-[180px]">
-                            <SelectValue placeholder="Filter Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Semua Status</SelectItem>
-                            <SelectItem value="available">Tersedia</SelectItem>
-                            <SelectItem value="unavailable">Tidak Tersedia</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
             </div>
 
             {/* Table */}

@@ -15,6 +15,21 @@ export const useGetVehicles = () => {
     });
 };
 
+/** Get satu vehicle by ID */
+export const useGetVehicleById = (id: string) => {
+    return useQuery({
+        queryKey: ['vehicles', id],
+        queryFn: async () => {
+            const { data } = await apiClient.get(`/vehicles/${id}`);
+            return data as any;
+        },
+        enabled:
+            typeof window !== 'undefined' &&
+            !!localStorage.getItem('access_token') &&
+            !!id,
+    });
+};
+
 /** Hitung status vehicles */
 export const useVehiclesStatusCount = () => {
     return useQuery({

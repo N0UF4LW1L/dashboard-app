@@ -1,17 +1,21 @@
 'use client';
 
+import { use } from 'react'; // 1. Import 'use' dari react
 import BreadCrumb from '@/components/breadcrumb';
 import { VehicleForm } from '../../_components/vehicle-form';
 import Spinner from '@/components/spinner';
-import { useGetVehicles } from '@/hooks/api/use-vehicle';
+import { useGetVehicleById } from '@/hooks/api/use-vehicle';
 
-export default function EditVehiclePage({ params }: { params: { vehicleId: string } }) {
-    const { data: vehicles = [], isLoading } = useGetVehicles();
-    const vehicle = vehicles.find((v: any) => v.id === params.vehicleId) ?? null;
+// 2. Update tipe data params menjadi Promise
+export default function EditVehiclePage({ params }: { params: Promise<{ vehicleId: string }> }) {
+    // 3. Unwrap params menggunakan hook 'use'
+    const { vehicleId } = use(params);
+    
+    const { data: vehicle, isLoading } = useGetVehicleById(vehicleId);
 
     const breadcrumbItems = [
         { title: 'Kendaraan', link: '/dashboard/vehicles' },
-        { title: 'Edit', link: `/dashboard/vehicles/${params.vehicleId}/edit` },
+        { title: 'Edit', link: `/dashboard/vehicles/${vehicleId}/edit` },
     ];
 
     return (
@@ -20,8 +24,8 @@ export default function EditVehiclePage({ params }: { params: { vehicleId: strin
             {isLoading && <Spinner />}
             {!isLoading && (
                 <VehicleForm
-                    initialData={vehicle}
-                    key={params.vehicleId}
+                    initialData={vehicle ?? null}
+                    key={vehicleId}
                 />
             )}
         </div>

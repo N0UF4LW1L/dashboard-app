@@ -22,7 +22,6 @@ interface Vehicle {
     name: string;
     rentalPrice: number;
     type: string;
-    isAvailable: boolean;
 }
 
 interface VehicleFormProps {
@@ -40,10 +39,7 @@ const VEHICLE_TYPES = [
     { id: 'Van', name: 'Van' },
 ];
 
-const STATUS_OPTIONS = [
-    { id: 'true', name: 'Tersedia' },
-    { id: 'false', name: 'Tidak Tersedia' },
-];
+
 
 export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
     const router = useRouter();
@@ -60,7 +56,6 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
         name: '',
         rentalPrice: '',
         type: '',
-        isAvailable: 'true',
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -70,7 +65,6 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
                 name: initialData.name,
                 rentalPrice: String(initialData.rentalPrice),
                 type: initialData.type,
-                isAvailable: String(initialData.isAvailable),
             });
         }
     }, [initialData]);
@@ -100,7 +94,6 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
             name: form.name.trim(),
             rentalPrice: Number(form.rentalPrice),
             type: form.type,
-            ...(isEdit && { isAvailable: form.isAvailable === 'true' }),
         };
 
         const mutation = isEdit ? updateMutation : createMutation;
@@ -201,30 +194,7 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
                         )}
                     </div>
 
-                    {/* Status — hanya saat edit */}
-                    {isEdit && (
-                        <div className="space-y-2">
-                            <Label htmlFor="veh-status">Status</Label>
-                            <Select
-                                value={form.isAvailable}
-                                onValueChange={(v) =>
-                                    setForm((f) => ({ ...f, isAvailable: v }))
-                                }
-                                disabled={isPending}
-                            >
-                                <SelectTrigger id="veh-status">
-                                    <SelectValue placeholder="Pilih status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {STATUS_OPTIONS.map((s) => (
-                                        <SelectItem key={s.id} value={s.id}>
-                                            {s.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    )}
+
                 </div>
 
                 {/* Error API */}

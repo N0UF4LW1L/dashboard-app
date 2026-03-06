@@ -25,15 +25,20 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        const message =
-            error.response?.data?.message || 'Terjadi kesalahan sistem';
-
         // Jika 401 Unauthorized, hapus token dan redirect ke login
         if (error.response?.status === 401 && typeof window !== 'undefined') {
             localStorage.removeItem('access_token');
             window.location.href = '/auth';
         }
 
-        return Promise.reject(new Error(message));
+        // Tetap reject dengan error asli agar onError handler bisa baca response.data
+        // Tapi pastikan error.message berisi pesan yang informatif
+        const message =
+            error.response?.data?.message ||
+            error.message ||
+            'Terjadi kesalahan sistem';
+
+        error.message = Array.isArray(message) ? message.join(', ') : message;
+        return Promise.reject(error);
     },
 );

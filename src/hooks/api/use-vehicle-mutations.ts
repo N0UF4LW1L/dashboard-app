@@ -49,7 +49,9 @@ export const useUpdateVehicle = (id: string) => {
             return data as Vehicle;
         },
         onSuccess: () => {
+            // Invalidate list dan detail agar keduanya fresh
             queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+            queryClient.invalidateQueries({ queryKey: ['vehicles', id] });
         },
     });
 };
