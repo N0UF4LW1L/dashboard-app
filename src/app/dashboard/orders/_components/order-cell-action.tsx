@@ -11,10 +11,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useDeleteOrder } from '@/hooks/api/use-order-mutations';
+import { useDeleteOrder, useUpdateOrder } from '@/hooks/api/use-order-mutations';
+import { CheckCircle } from 'lucide-react';
 
 interface Order {
     id: string;
+    isReturned: boolean;
 }
 
 interface CellActionProps {
@@ -24,7 +26,10 @@ interface CellActionProps {
 export const OrderCellAction: React.FC<CellActionProps> = ({ data }) => {
     const [open, setOpen] = useState(false);
     const router = useRouter();
-    const { mutate: deleteOrder, isPending } = useDeleteOrder();
+    const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
+    const { mutate: updateOrder, isPending: isUpdating } = useUpdateOrder(data.id);
+
+    const isPending = isDeleting || isUpdating;
 
     const onConfirm = () => {
         deleteOrder(data.id, {
@@ -78,6 +83,18 @@ export const OrderCellAction: React.FC<CellActionProps> = ({ data }) => {
                     >
                         <Edit className="mr-2 h-4 w-4" /> Edit
                     </DropdownMenuItem>
+
+                    {!data.isReturned && (
+                        <DropdownMenuItem
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                updateOrder({ isReturned: true });
+                            }}
+                            disabled={isPending}
+                        >
+                            <CheckCircle className="mr-2 h-4 w-4" /> Unit Telah Kembali
+                        </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem
                         className="text-red-500"
                         onClick={(e) => {

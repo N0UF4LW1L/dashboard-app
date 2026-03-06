@@ -4,20 +4,22 @@ import BreadCrumb from '@/components/breadcrumb';
 import { OrderForm } from '../../_components/order-form';
 import Spinner from '@/components/spinner';
 import { useGetOrders } from '@/hooks/api/use-order';
+import { use } from 'react';
 
 export default function EditOrderPage({
     params,
 }: {
-    params: { orderId: string };
+    params: Promise<{ orderId: string }>;
 }) {
+    const { orderId } = use(params);
     const { data: orders = [], isLoading } = useGetOrders();
-    const order = orders.find((o: any) => o.id === params.orderId) ?? null;
+    const order = orders.find((o: any) => o.id === orderId) ?? null;
 
     const breadcrumbItems = [
         { title: 'Pesanan', link: '/dashboard/orders' },
         {
             title: 'Edit',
-            link: `/dashboard/orders/${params.orderId}/edit`,
+            link: `/dashboard/orders/${orderId}/edit`,
         },
     ];
 
@@ -28,7 +30,7 @@ export default function EditOrderPage({
             {!isLoading && (
                 <OrderForm
                     initialData={order}
-                    key={params.orderId}
+                    key={orderId}
                 />
             )}
         </div>

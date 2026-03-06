@@ -25,6 +25,7 @@ export interface UpdateOrderPayload {
     pickupFee?: number;
     additionalItems?: string;
     paymentStatus?: string;
+    isReturned?: boolean;
 }
 
 export const useCreateOrder = () => {

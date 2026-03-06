@@ -27,6 +27,7 @@ interface Order {
     vehicleId: string;
     rentalDays: number;
     startDate: string;
+    endDate?: string;
     usageArea: string;
     insuranceFee: number;
     pickupFee?: number;
@@ -36,6 +37,13 @@ interface Order {
 
 interface OrderFormProps {
     initialData: Order | null;
+}
+
+function computeEndDate(startDate: string, rentalDays: string): string {
+    if (!startDate || !rentalDays || Number(rentalDays) <= 0) return '';
+    const start = new Date(startDate);
+    start.setDate(start.getDate() + Number(rentalDays));
+    return start.toISOString().split('T')[0];
 }
 
 export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
@@ -57,6 +65,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         vehicleId: '',
         rentalDays: '',
         startDate: '',
+        endDate: '',
         usageArea: 'Dalam Kota',
         insuranceFee: '',
         pickupFee: '',
@@ -68,11 +77,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
 
     useEffect(() => {
         if (initialData) {
+            const sd = initialData.startDate?.split('T')[0] || '';
+            const rd = initialData.rentalDays?.toString() || '';
             setForm({
                 customerId: initialData.customer?.id || initialData.customerId || '',
                 vehicleId: initialData.vehicle?.id || initialData.vehicleId || '',
-                rentalDays: initialData.rentalDays?.toString() || '',
-                startDate: initialData.startDate?.split('T')[0] || '',
+                rentalDays: rd,
+                startDate: sd,
+                endDate: computeEndDate(sd, rd),
                 usageArea: initialData.usageArea || 'Dalam Kota',
                 insuranceFee: initialData.insuranceFee?.toString() || '',
                 pickupFee: initialData.pickupFee?.toString() || '',
@@ -87,7 +99,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         if (!form.customerId) errs.customerId = 'Pelanggan wajib dipilih';
         if (!form.vehicleId) errs.vehicleId = 'Kendaraan/Armada wajib dipilih';
         if (!form.rentalDays || Number(form.rentalDays) <= 0) errs.rentalDays = 'Durasi sewa minimal 1 hari';
-        if (!form.startDate) errs.startDate = 'Tanggal pengembalian wajib diisi';
+        if (!form.startDate) errs.startDate = 'Tanggal mulai wajib diisi';
         if (!form.insuranceFee) errs.insuranceFee = 'Biaya asuransi wajib diisi';
         return errs;
     };
@@ -108,7 +120,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
             usageArea: form.usageArea,
             insuranceFee: Number(form.insuranceFee),
             pickupFee: form.pickupFee ? Number(form.pickupFee) : undefined,
-            additionalItems: form.additionalItems ? form.additionalItems : undefined,
+            additionalItems: form.additionalItems || undefined,
             paymentStatus: form.paymentStatus,
         };
 
@@ -181,14 +193,19 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                         {errors.vehicleId && <p className="text-sm text-destructive">{errors.vehicleId}</p>}
                     </div>
 
-                    {/* Tanggal Sewa */}
+                    {/* Tanggal Mulai */}
                     <div className="space-y-2">
                         <Label>Tanggal Mulai (Pengambilan) <span className="text-red-500">*</span></Label>
                         <Input
                             type="date"
-                            value={form.startDate}
+                            value={form.startDate ?? ''}
                             onChange={(e) => {
-                                setForm((f) => ({ ...f, startDate: e.target.value }));
+                                const sd = e.target.value;
+                                setForm((f) => ({
+                                    ...f,
+                                    startDate: sd,
+                                    endDate: computeEndDate(sd, f.rentalDays),
+                                }));
                                 setErrors((prev) => ({ ...prev, startDate: '' }));
                             }}
                             disabled={isPending}
@@ -203,14 +220,31 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                             type="number"
                             min="1"
                             placeholder="Misal: 3"
-                            value={form.rentalDays}
+                            value={form.rentalDays ?? ''}
                             onChange={(e) => {
-                                setForm((f) => ({ ...f, rentalDays: e.target.value }));
+                                const rd = e.target.value;
+                                setForm((f) => ({
+                                    ...f,
+                                    rentalDays: rd,
+                                    endDate: computeEndDate(f.startDate, rd),
+                                }));
                                 setErrors((prev) => ({ ...prev, rentalDays: '' }));
                             }}
                             disabled={isPending}
                         />
                         {errors.rentalDays && <p className="text-sm text-destructive">{errors.rentalDays}</p>}
+                    </div>
+
+                    {/* Tanggal Akhir */}
+                    <div className="space-y-2">
+                        <Label>Tanggal Akhir (Pengembalian)</Label>
+                        <Input
+                            type="date"
+                            value={form.endDate ?? ''}
+                            readOnly
+                            disabled
+                            className="bg-muted text-muted-foreground cursor-not-allowed"
+                        />
                     </div>
 
                     {/* Area Penggunaan */}
@@ -260,7 +294,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                             type="number"
                             min="0"
                             placeholder="Misal: 50000"
-                            value={form.insuranceFee}
+                            value={form.insuranceFee ?? ''}
                             onChange={(e) => {
                                 setForm((f) => ({ ...f, insuranceFee: e.target.value }));
                                 setErrors((prev) => ({ ...prev, insuranceFee: '' }));
@@ -277,7 +311,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                             type="number"
                             min="0"
                             placeholder="Misal: 25000"
-                            value={form.pickupFee}
+                            value={form.pickupFee ?? ''}
                             onChange={(e) => setForm((f) => ({ ...f, pickupFee: e.target.value }))}
                             disabled={isPending}
                         />
@@ -288,7 +322,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                         <Label>Catatan / Item Tambahan (opsional)</Label>
                         <Input
                             placeholder="Misal: Extra driver, tambahan baby seat"
-                            value={form.additionalItems}
+                            value={form.additionalItems ?? ''}
                             onChange={(e) => setForm((f) => ({ ...f, additionalItems: e.target.value }))}
                             disabled={isPending}
                         />

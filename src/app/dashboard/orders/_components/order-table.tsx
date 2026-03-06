@@ -44,6 +44,7 @@ import {
     HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Order {
     id: string;
@@ -55,6 +56,7 @@ interface Order {
     usageArea: string;
     totalPrice: number;
     paymentStatus: string;
+    isReturned: boolean;
 }
 
 interface OrderTableProps {
@@ -62,6 +64,27 @@ interface OrderTableProps {
     isLoading: boolean;
     pageSizeOptions?: number[];
 }
+
+// ─── Logika status berdasarkan tanggal ───────────────────────────────────────
+type OrderStatus = 'menunggu' | 'berjalan' | 'selesai';
+
+function getOrderStatus(order: Order): OrderStatus {
+    if (order.isReturned) return 'selesai';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const start = new Date(order.startDate);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(order.endDate);
+    end.setHours(0, 0, 0, 0);
+
+    if (start > today) return 'menunggu';
+    if (end < today) return 'selesai';
+    return 'berjalan';
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<Order>[] = [
     {
@@ -163,20 +186,24 @@ const columns: ColumnDef<Order>[] = [
     },
 ];
 
-export default function OrderTable({
+// ─── Sub-komponen tabel (reusable untuk setiap tab) ──────────────────────────
+function OrderDataTable({
     data,
-    isLoading,
     pageSizeOptions = [10, 20, 30, 40, 50],
-}: OrderTableProps) {
-    const [searchQuery, setSearchQuery] = React.useState('');
-
+    searchQuery,
+    onSearchChange,
+}: {
+    data: Order[];
+    pageSizeOptions?: number[];
+    searchQuery: string;
+    onSearchChange: (v: string) => void;
+}) {
     const [{ pageIndex, pageSize }, setPagination] =
         React.useState<PaginationState>({
             pageIndex: 0,
             pageSize: 10,
         });
 
-    // Filter by customer name
     const filteredData = React.useMemo(() => {
         if (!searchQuery) return data;
         const q = searchQuery.toLowerCase();
@@ -201,10 +228,6 @@ export default function OrderTable({
         manualPagination: false,
     });
 
-    if (isLoading) {
-        return <Spinner />;
-    }
-
     return (
         <>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-5">
@@ -212,14 +235,14 @@ export default function OrderTable({
                     placeholder="Cari Pelanggan atau Armada"
                     value={searchQuery}
                     onChange={(e) => {
-                        setSearchQuery(e.target.value);
+                        onSearchChange(e.target.value);
                         setPagination((p) => ({ ...p, pageIndex: 0 }));
                     }}
                     className="w-full md:max-w-sm"
                 />
             </div>
 
-            <ScrollArea className="rounded-md border h-[calc(80vh-220px)]">
+            <ScrollArea className="rounded-md border h-[calc(80vh-280px)]">
                 <Table className="relative">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -273,6 +296,7 @@ export default function OrderTable({
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
 
+            {/* Pagination */}
             <div className="flex flex-col gap-2 sm:flex-row items-center justify-end space-x-2 py-4">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
@@ -350,5 +374,79 @@ export default function OrderTable({
                 </div>
             </div>
         </>
+    );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+export default function OrderTable({
+    data,
+    isLoading,
+    pageSizeOptions = [10, 20, 30, 40, 50],
+}: OrderTableProps) {
+    const [searchQuery, setSearchQuery] = React.useState('');
+
+    // Partisi data berdasarkan status tanggal
+    const { menunggu, berjalan, selesai } = React.useMemo(() => {
+        const menunggu: Order[] = [];
+        const berjalan: Order[] = [];
+        const selesai: Order[] = [];
+
+        data.forEach((order) => {
+            const status = getOrderStatus(order);
+            if (status === 'menunggu') menunggu.push(order);
+            else if (status === 'berjalan') berjalan.push(order);
+            else selesai.push(order);
+        });
+
+        return { menunggu, berjalan, selesai };
+    }, [data]);
+
+    if (isLoading) return <Spinner />;
+
+    return (
+        <Tabs defaultValue="menunggu">
+            {/* Tab header — sama persis dengan referensi */}
+            <TabsList>
+                <TabsTrigger value="menunggu" id="tab-menunggu">
+                    Menunggu
+                </TabsTrigger>
+                <TabsTrigger value="berjalan" id="tab-berjalan">
+                    Sedang Berjalan
+                </TabsTrigger>
+                <TabsTrigger value="selesai" id="tab-selesai">
+                    Selesai
+                </TabsTrigger>
+            </TabsList>
+
+            {/* Tab: Menunggu */}
+            <TabsContent value="menunggu" className="space-y-4">
+                <OrderDataTable
+                    data={menunggu}
+                    pageSizeOptions={pageSizeOptions}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                />
+            </TabsContent>
+
+            {/* Tab: Sedang Berjalan */}
+            <TabsContent value="berjalan" className="space-y-4">
+                <OrderDataTable
+                    data={berjalan}
+                    pageSizeOptions={pageSizeOptions}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                />
+            </TabsContent>
+
+            {/* Tab: Selesai */}
+            <TabsContent value="selesai" className="space-y-4">
+                <OrderDataTable
+                    data={selesai}
+                    pageSizeOptions={pageSizeOptions}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                />
+            </TabsContent>
+        </Tabs>
     );
 }
