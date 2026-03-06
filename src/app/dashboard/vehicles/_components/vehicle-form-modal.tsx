@@ -12,7 +12,6 @@ interface Vehicle {
     name: string;
     rentalPrice: number;
     type: string;
-    isAvailable: boolean;
 }
 
 interface VehicleFormModalProps {
@@ -38,7 +37,6 @@ export default function VehicleFormModal({
         name: '',
         rentalPrice: '',
         type: '',
-        isAvailable: true,
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -49,10 +47,9 @@ export default function VehicleFormModal({
                 name: vehicle.name,
                 rentalPrice: String(vehicle.rentalPrice),
                 type: vehicle.type,
-                isAvailable: vehicle.isAvailable,
             });
         } else {
-            setForm({ name: '', rentalPrice: '', type: '', isAvailable: true });
+            setForm({ name: '', rentalPrice: '', type: '' });
         }
         setErrors({});
     }, [vehicle, isEdit, open]);
@@ -78,7 +75,6 @@ export default function VehicleFormModal({
             name: form.name.trim(),
             rentalPrice: Number(form.rentalPrice),
             type: form.type,
-            ...(isEdit && { isAvailable: form.isAvailable }),
         };
 
         const mutation = isEdit ? updateMutation : createMutation;
@@ -190,31 +186,6 @@ export default function VehicleFormModal({
                         )}
                     </div>
 
-                    {/* Status Ketersediaan (hanya saat edit) */}
-                    {isEdit && (
-                        <div className="space-y-2">
-                            <Label>Status Ketersediaan</Label>
-                            <div className="flex gap-3">
-                                {[
-                                    { label: 'Tersedia', value: true, cls: 'border-emerald-500 bg-emerald-50 text-emerald-700' },
-                                    { label: 'Tidak Tersedia', value: false, cls: 'border-red-400 bg-red-50 text-red-700' },
-                                ].map((opt) => (
-                                    <button
-                                        key={String(opt.value)}
-                                        type="button"
-                                        onClick={() => setForm((f) => ({ ...f, isAvailable: opt.value }))}
-                                        disabled={isPending}
-                                        className={`flex-1 rounded-lg border-2 py-2 text-sm font-medium transition-all ${form.isAvailable === opt.value
-                                            ? opt.cls
-                                            : 'border-border text-muted-foreground hover:border-muted-foreground'
-                                            }`}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
 
                     {/* Error dari API */}
                     {(createMutation.isError || updateMutation.isError) && (

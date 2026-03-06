@@ -1,5 +1,6 @@
 'use client';
 
+import { use } from 'react'; // 1. Import hook use
 import BreadCrumb from '@/components/breadcrumb';
 import { CustomerForm } from '../../_components/customer-form';
 import Spinner from '@/components/spinner';
@@ -8,17 +9,23 @@ import { useGetCustomers } from '@/hooks/api/use-customer';
 export default function EditCustomerPage({
     params,
 }: {
-    params: { customerId: string };
+    // 2. Update tipe data params menjadi Promise
+    params: Promise<{ customerId: string }>;
 }) {
+    // 3. Ambil data customerId menggunakan use()
+    const { customerId } = use(params);
+
     const { data: customers = [], isLoading } = useGetCustomers();
+    
+    // Gunakan customerId yang sudah di-unwrap
     const customer =
-        customers.find((c: any) => c.id === params.customerId) ?? null;
+        customers.find((c: any) => c.id === customerId) ?? null;
 
     const breadcrumbItems = [
         { title: 'Customers', link: '/dashboard/customers' },
         {
             title: 'Edit',
-            link: `/dashboard/customers/${params.customerId}/edit`,
+            link: `/dashboard/customers/${customerId}/edit`,
         },
     ];
 
@@ -29,7 +36,7 @@ export default function EditCustomerPage({
             {!isLoading && (
                 <CustomerForm
                     initialData={customer}
-                    key={params.customerId}
+                    key={customerId}
                 />
             )}
         </div>
