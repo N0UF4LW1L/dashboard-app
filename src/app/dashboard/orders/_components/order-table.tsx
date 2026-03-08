@@ -58,6 +58,7 @@ interface Order {
     paymentStatus: string;
     isReturned: boolean;
     invoiceNumber?: string;
+    isWithDriver?: boolean;
 }
 
 interface OrderTableProps {
@@ -88,13 +89,6 @@ function getOrderStatus(order: Order): OrderStatus {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<Order>[] = [
-    {
-        accessorKey: 'invoiceNumber',
-        header: () => (
-            <span className="text-sm font-semibold text-neutral-700">No. Invoice</span>
-        ),
-        cell: ({ row }) => <span>{row.original.invoiceNumber ?? '-'}</span>,
-    },
     {
         accessorKey: 'customer',
         header: () => (
@@ -152,13 +146,20 @@ const columns: ColumnDef<Order>[] = [
         ),
     },
     {
-        accessorKey: 'usageArea',
+        accessorKey: 'isWithDriver',
         header: () => (
             <span className="text-sm font-semibold text-neutral-700">
-                Area Penggunaan
+                Keterangan Sewa
             </span>
         ),
-        cell: ({ row }) => <span>{row.original.usageArea}</span>,
+        cell: ({ row }) => <span>{row.original.isWithDriver ? 'Dengan Supir' : 'Lepas Kunci'}</span>,
+    },
+    {
+        accessorKey: 'invoiceNumber',
+        header: () => (
+            <span className="text-sm font-semibold text-neutral-700">No. Invoice</span>
+        ),
+        cell: ({ row }) => <span>{row.original.invoiceNumber ?? '-'}</span>,
     },
     {
         accessorKey: 'totalPrice',

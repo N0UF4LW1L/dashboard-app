@@ -11,6 +11,7 @@ export interface CreateOrderPayload {
     usageArea: string; // 'Dalam Kota' | 'Luar Kota'
     insuranceFee: number;
     pickupFee?: number;
+    isWithDriver?: boolean;
     additionalItems?: string;
     paymentStatus?: string; // 'Lunas' | 'Belum Lunas'
 }
@@ -23,6 +24,7 @@ export interface UpdateOrderPayload {
     usageArea?: string;
     insuranceFee?: number;
     pickupFee?: number;
+    isWithDriver?: boolean;
     additionalItems?: string;
     paymentStatus?: string;
     isReturned?: boolean;
