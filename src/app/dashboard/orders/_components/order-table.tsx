@@ -57,6 +57,7 @@ interface Order {
     totalPrice: number;
     paymentStatus: string;
     isReturned: boolean;
+    invoiceNumber?: string;
 }
 
 interface OrderTableProps {
@@ -87,6 +88,13 @@ function getOrderStatus(order: Order): OrderStatus {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const columns: ColumnDef<Order>[] = [
+    {
+        accessorKey: 'invoiceNumber',
+        header: () => (
+            <span className="text-sm font-semibold text-neutral-700">No. Invoice</span>
+        ),
+        cell: ({ row }) => <span>{row.original.invoiceNumber ?? '-'}</span>,
+    },
     {
         accessorKey: 'customer',
         header: () => (
@@ -123,8 +131,8 @@ const columns: ColumnDef<Order>[] = [
                         </span>
                     </div>
                     <div className="pt-1">
-                        <p className="text-[14px] font-semibold leading-5">
-                            {formatDate(row.original.startDate)}
+                        <p className="text-[14px] font-semibold leading-5 mb-1 text-blue-600">
+                            {formatDate(row.original.startDate, true)}
                         </p>
                     </div>
                     <Separator className="my-4" />
@@ -135,8 +143,8 @@ const columns: ColumnDef<Order>[] = [
                         </span>
                     </div>
                     <div className="pt-1">
-                        <p className="text-[14px] font-semibold leading-5">
-                            {formatDate(row.original.endDate)}
+                        <p className="text-[14px] font-semibold leading-5 text-green-600">
+                            {formatDate(row.original.endDate, true)}
                         </p>
                     </div>
                 </HoverCardContent>
@@ -210,7 +218,8 @@ function OrderDataTable({
         return data.filter(
             (o) =>
                 o.customer?.name?.toLowerCase().includes(q) ||
-                o.vehicle?.name?.toLowerCase().includes(q),
+                o.vehicle?.name?.toLowerCase().includes(q) ||
+                o.invoiceNumber?.toLowerCase().includes(q)
         );
     }, [data, searchQuery]);
 
@@ -232,7 +241,7 @@ function OrderDataTable({
         <>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-5">
                 <Input
-                    placeholder="Cari Pelanggan atau Armada"
+                    placeholder="Cari Invoice, Pelanggan, atau Armada"
                     value={searchQuery}
                     onChange={(e) => {
                         onSearchChange(e.target.value);

@@ -39,11 +39,21 @@ interface OrderFormProps {
     initialData: Order | null;
 }
 
+const formatToDatetimeLocal = (dateString?: string) => {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return '';
+    const offset = d.getTimezoneOffset() * 60000;
+    return (new Date(d.getTime() - offset)).toISOString().slice(0, 16);
+};
+
 function computeEndDate(startDate: string, rentalDays: string): string {
     if (!startDate || !rentalDays || Number(rentalDays) <= 0) return '';
     const start = new Date(startDate);
     start.setDate(start.getDate() + Number(rentalDays));
-    return start.toISOString().split('T')[0];
+    start.setHours(start.getHours() - 1);
+    const offset = start.getTimezoneOffset() * 60000;
+    return (new Date(start.getTime() - offset)).toISOString().slice(0, 16);
 }
 
 export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
@@ -60,7 +70,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
     const { data: customers = [], isLoading: loadingCustomers } = useGetCustomers();
     const { data: vehicles = [], isLoading: loadingVehicles } = useGetVehicles();
 
-    const formStartDate = initialData?.startDate?.split('T')[0] || '';
+    const formStartDate = formatToDatetimeLocal(initialData?.startDate);
     const formRentalDays = initialData?.rentalDays?.toString() || '';
     const formEndDate = initialData ? computeEndDate(formStartDate, formRentalDays) : '';
 
@@ -182,7 +192,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                     <div className="space-y-2">
                         <Label>Tanggal Mulai (Pengambilan) <span className="text-red-500">*</span></Label>
                         <Input
-                            type="date"
+                            type="datetime-local"
                             value={form.startDate ?? ''}
                             onChange={(e) => {
                                 const sd = e.target.value;
@@ -224,7 +234,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                     <div className="space-y-2">
                         <Label>Tanggal Akhir (Pengembalian)</Label>
                         <Input
-                            type="date"
+                            type="datetime-local"
                             value={form.endDate ?? ''}
                             readOnly
                             disabled
