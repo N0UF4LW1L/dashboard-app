@@ -35,63 +35,43 @@ import {
     ChevronsRight,
 } from 'lucide-react';
 import Spinner from '@/components/spinner';
-import { VehicleCellAction } from './vehicle-cell-action';
+import { LocationCellAction } from './location-cell-action';
 
-interface Vehicle {
+interface Location {
     id: string;
     name: string;
-    rentalPrice: number;
-    type: string;
-    location?: {
-        name: string;
-    };
+    address: string;
 }
 
-interface VehicleTableProps {
-    data: Vehicle[];
+interface LocationTableProps {
+    data: Location[];
     isLoading: boolean;
     pageSizeOptions?: number[];
 }
 
-const columns: ColumnDef<Vehicle>[] = [
+const columns: ColumnDef<Location>[] = [
     {
         accessorKey: 'name',
-        header: 'Nama',
+        header: 'Nama Lokasi',
     },
     {
-        accessorKey: 'type',
-        header: 'Tipe',
-        cell: ({ row }) => <span>{row.original.type}</span>,
-    },
-    {
-        accessorKey: 'location',
-        header: 'Lokasi / Pool',
-        cell: ({ row }) => <span>{row.original.location?.name || '-'}</span>,
-    },
-    {
-        accessorKey: 'rentalPrice',
-        header: 'Harga Sewa / Hari',
+        accessorKey: 'address',
+        header: 'Alamat',
         cell: ({ row }) => (
-            <span>
-                {new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                }).format(Number(row.original.rentalPrice))}
-            </span>
+            <span className="line-clamp-2">{row.original.address}</span>
         ),
     },
     {
         id: 'actions',
-        cell: ({ row }) => <VehicleCellAction data={row.original} />,
+        cell: ({ row }) => <LocationCellAction data={row.original} />,
     },
 ];
 
-export default function VehicleTable({
+export default function LocationTable({
     data,
     isLoading,
     pageSizeOptions = [10, 20, 30, 40, 50],
-}: VehicleTableProps) {
+}: LocationTableProps) {
     const [searchQuery, setSearchQuery] = React.useState('');
 
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
@@ -99,11 +79,11 @@ export default function VehicleTable({
         pageSize: 10,
     });
 
-    // Filter data berdasarkan search
     const filteredData = React.useMemo(() => {
         if (!searchQuery) return data;
-        return data.filter((v) =>
-            v.name.toLowerCase().includes(searchQuery.toLowerCase()),
+        return data.filter((l) =>
+            l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            l.address.toLowerCase().includes(searchQuery.toLowerCase()),
         );
     }, [data, searchQuery]);
 
@@ -127,10 +107,10 @@ export default function VehicleTable({
 
     return (
         <>
-            {/* Filter bar — persis seperti referensi */}
+            {/* Filter bar */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-5">
                 <Input
-                    placeholder="Cari kendaraan..."
+                    placeholder="Cari lokasi..."
                     value={searchQuery}
                     onChange={(e) => {
                         setSearchQuery(e.target.value);

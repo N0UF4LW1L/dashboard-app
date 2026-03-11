@@ -16,12 +16,14 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/heading';
 import { Loader2 } from 'lucide-react';
 import { useCreateVehicle, useUpdateVehicle } from '@/hooks/api/use-vehicle-mutations';
+import { useGetLocations } from '@/hooks/api/use-location';
 
 interface Vehicle {
     id: string;
     name: string;
     rentalPrice: number;
     type: string;
+    locationId?: string;
 }
 
 interface VehicleFormProps {
@@ -52,10 +54,13 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
     const createMutation = useCreateVehicle();
     const updateMutation = useUpdateVehicle(initialData?.id ?? '');
 
+    const { data: locations = [], isLoading: isLocationsLoading } = useGetLocations();
+
     const [form, setForm] = useState({
         name: initialData?.name || '',
         rentalPrice: initialData?.rentalPrice ? String(initialData.rentalPrice) : '',
         type: initialData?.type || '',
+        locationId: initialData?.locationId || '',
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -69,10 +74,11 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
             Number(form.rentalPrice) <= 0
         )
             errs.rentalPrice = 'Harga sewa harus lebih dari 0';
+        if (!form.locationId) errs.locationId = 'Lokasi wajib dipilih';
         return errs;
     };
 
-    const onSubmit = (e: React.FormEvent) => {
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const errs = validate();
         if (Object.keys(errs).length > 0) {
@@ -84,6 +90,7 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
             name: form.name.trim(),
             rentalPrice: Number(form.rentalPrice),
             type: form.type,
+            locationId: form.locationId,
         };
 
         const mutation = isEdit ? updateMutation : createMutation;
@@ -184,6 +191,34 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ initialData }) => {
                         )}
                     </div>
 
+                    {/* Lokasi */}
+                    <div className="space-y-2">
+                        <Label htmlFor="veh-location" className="relative">
+                            Lokasi / Pool <span className="text-red-500">*</span>
+                        </Label>
+                        <Select
+                            value={form.locationId}
+                            onValueChange={(v) => {
+                                setForm((f) => ({ ...f, locationId: v }));
+                                setErrors((r) => ({ ...r, locationId: '' }));
+                            }}
+                            disabled={isPending || isLocationsLoading}
+                        >
+                            <SelectTrigger id="veh-location">
+                                <SelectValue placeholder="Pilih lokasi penyewaan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {locations.map((loc: any) => (
+                                    <SelectItem key={loc.id} value={loc.id}>
+                                        {loc.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.locationId && (
+                            <p className="text-sm font-medium text-destructive">{errors.locationId}</p>
+                        )}
+                    </div>
 
                 </div>
 

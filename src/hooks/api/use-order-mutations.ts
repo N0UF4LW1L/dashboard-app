@@ -14,6 +14,7 @@ export interface CreateOrderPayload {
     isWithDriver?: boolean;
     additionalItems?: string;
     paymentStatus?: string; // 'Lunas' | 'Belum Lunas'
+    discount?: number;
 }
 
 export interface UpdateOrderPayload {
@@ -28,6 +29,7 @@ export interface UpdateOrderPayload {
     additionalItems?: string;
     paymentStatus?: string;
     isReturned?: boolean;
+    discount?: number;
 }
 
 export const useCreateOrder = () => {

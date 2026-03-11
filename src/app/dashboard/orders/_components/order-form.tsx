@@ -35,6 +35,7 @@ interface Order {
     pickupFee?: number;
     isWithDriver?: boolean;
     additionalItems?: string;
+    discount?: number;
     paymentStatus: string;
 }
 
@@ -88,6 +89,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         pickupFee: initialData?.pickupFee?.toString() || '',
         isWithDriver: initialData?.isWithDriver || false,
         additionalItems: initialData?.additionalItems || '',
+        discount: initialData?.discount?.toString() || '',
         paymentStatus: initialData?.paymentStatus || 'Belum Lunas',
     });
 
@@ -100,6 +102,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         if (!form.rentalDays || Number(form.rentalDays) <= 0) errs.rentalDays = 'Durasi sewa minimal 1 hari';
         if (!form.startDate) errs.startDate = 'Tanggal mulai wajib diisi';
         if (!form.insuranceFee) errs.insuranceFee = 'Biaya asuransi wajib diisi';
+        if (form.discount && (Number(form.discount) < 0 || Number(form.discount) > 100)) errs.discount = 'Diskon harus 0 - 100%';
         return errs;
     };
 
@@ -121,6 +124,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
             pickupFee: form.pickupFee ? Number(form.pickupFee) : undefined,
             isWithDriver: form.isWithDriver,
             additionalItems: form.additionalItems || undefined,
+            discount: form.discount ? Number(form.discount) : undefined,
             paymentStatus: form.paymentStatus,
         };
 
@@ -136,7 +140,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
 
     // Kalkulasi Rincian Harga
     const selectedVehicle = vehicles.find((v: any) => v.id === form.vehicleId);
-    const rentalCost = (Number(selectedVehicle?.rentalPrice) || 0) * (Number(form.rentalDays) || 0);
+    const vehiclePrice = Number(selectedVehicle?.rentalPrice) || 0;
+    const discountPercentage = Number(form.discount) || 0;
+    const discountedPrice = vehiclePrice * (1 - (discountPercentage / 100));
+    const rentalCost = discountedPrice * (Number(form.rentalDays) || 0);
     const locationFee = form.usageArea === 'Luar Kota' ? 100000 : 0;
     const insuranceFee = Number(form.insuranceFee) || 0;
     const pickupFee = Number(form.pickupFee) || 0;
@@ -276,6 +283,24 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                             />
                         </div>
 
+                        {/* Diskon */}
+                        <div className="space-y-2">
+                            <Label>Diskon Sewa (%) <span className="text-muted-foreground font-normal ml-1">(opsional)</span></Label>
+                            <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                placeholder="Misal: 10"
+                                value={form.discount ?? ''}
+                                onChange={(e) => {
+                                    setForm((f) => ({ ...f, discount: e.target.value }));
+                                    setErrors((prev) => ({ ...prev, discount: '' }));
+                                }}
+                                disabled={isPending}
+                            />
+                            {errors.discount && <p className="text-sm text-destructive">{errors.discount}</p>}
+                        </div>
+
                         {/* Area Penggunaan */}
                         <div className="space-y-2">
                             <Label>Area Penggunaan <span className="text-red-500">*</span></Label>
@@ -373,17 +398,21 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                                     <p className="font-medium text-sm text-neutral-700">
                                         {selectedVehicle ? `${selectedVehicle.name} (per 24 jam)` : "Armada"}
                                     </p>
-                                    <p className="font-semibold text-base">
-                                        {formatRupiah(selectedVehicle?.rentalPrice ?? 0)}
+                                    <p className="font-semibold text-base flex flex-col items-end">
+                                        {formatRupiah(vehiclePrice)}
+                                        {discountPercentage > 0 && <span className="text-xs text-red-500 bg-red-50 px-1 py-0.5 rounded mt-1">Disc {discountPercentage}%</span>}
                                     </p>
                                 </div>
 
                                 {selectedVehicle && form.rentalDays && (
                                     <div className="flex justify-between mb-1">
-                                        <p className="font-medium text-sm text-neutral-700">
-                                            {form.rentalDays} Hari
-                                        </p>
-                                        <p className="font-semibold text-base">
+                                        <div className="flex flex-col">
+                                            <p className="font-medium text-sm text-neutral-700">
+                                                {form.rentalDays} Hari
+                                            </p>
+                                            {discountPercentage > 0 && <span className="text-xs text-muted-foreground">(Harga setelah diskon)</span>}
+                                        </div>
+                                        <p className="font-semibold text-base mt-auto">
                                             {formatRupiah(rentalCost)}
                                         </p>
                                     </div>

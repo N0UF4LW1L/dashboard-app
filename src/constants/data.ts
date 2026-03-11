@@ -55,6 +55,13 @@ export const navItems: NavItem[] = [
                 label: 'customers',
                 roles: ['admin'],
             },
+            {
+                title: 'Lokasi',
+                href: '/dashboard/location',
+                icon: 'home',
+                label: 'location',
+                roles: ['admin'],
+            },
         ],
     },
     {

@@ -17,6 +17,7 @@ export interface CreateVehiclePayload {
     name: string;
     rentalPrice: number;
     type: string;
+    locationId?: string;
 }
 
 export interface UpdateVehiclePayload {
@@ -24,6 +25,7 @@ export interface UpdateVehiclePayload {
     rentalPrice?: number;
     type?: string;
     isAvailable?: boolean;
+    locationId?: string;
 }
 
 /** Tambah kendaraan baru */
