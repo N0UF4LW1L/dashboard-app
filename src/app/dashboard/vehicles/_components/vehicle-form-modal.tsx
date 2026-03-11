@@ -21,7 +21,7 @@ interface VehicleFormModalProps {
     vehicle?: Vehicle;
 }
 
-const VEHICLE_TYPES = ['MPV', 'SUV', 'Sedan', 'Pick Up', 'Minibus', 'Truk', 'Motor', 'Van'];
+const VEHICLE_TYPES = ['Mobil', 'Motor'];
 
 export default function VehicleFormModal({
     open,

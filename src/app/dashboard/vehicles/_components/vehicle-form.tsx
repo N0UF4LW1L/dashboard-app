@@ -31,14 +31,8 @@ interface VehicleFormProps {
 }
 
 const VEHICLE_TYPES = [
-    { id: 'MPV', name: 'MPV' },
-    { id: 'SUV', name: 'SUV' },
-    { id: 'Sedan', name: 'Sedan' },
-    { id: 'Pick Up', name: 'Pick Up' },
-    { id: 'Minibus', name: 'Minibus' },
-    { id: 'Truk', name: 'Truk' },
+    { id: 'Mobil', name: 'Mobil' },
     { id: 'Motor', name: 'Motor' },
-    { id: 'Van', name: 'Van' },
 ];
 
 
