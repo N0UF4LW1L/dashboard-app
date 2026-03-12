@@ -19,7 +19,9 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCreateOrder, useUpdateOrder, CreateOrderPayload } from '@/hooks/api/use-order-mutations';
 import { useGetCustomers } from '@/hooks/api/use-customer';
 import { useGetVehicles } from '@/hooks/api/use-vehicle';
+import { useGetAddons, Addon } from '@/hooks/api/use-addon';
 import { formatRupiah } from '@/lib/utils';
+import { Trash } from 'lucide-react';
 
 interface Order {
     id: string;
@@ -73,6 +75,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
 
     const { data: customers = [], isLoading: loadingCustomers } = useGetCustomers();
     const { data: vehicles = [], isLoading: loadingVehicles } = useGetVehicles();
+    const { data: allAddons = [], isLoading: loadingAddons } = useGetAddons();
 
     const formStartDate = formatToDatetimeLocal(initialData?.startDate);
     const formRentalDays = initialData?.rentalDays?.toString() || '';
@@ -92,6 +95,11 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         discount: initialData?.discount?.toString() || '',
         paymentStatus: initialData?.paymentStatus || 'Belum Lunas',
     });
+
+    const [selectedAddons, setSelectedAddons] = useState<{ addonId: string, quantity: number }[]>(
+        // @ts-ignore
+        initialData?.orderAddons?.map(oa => ({ addonId: oa.addonId, quantity: oa.quantity })) || []
+    );
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -114,6 +122,17 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
             return;
         }
 
+        // Validate addons stock
+        let addonError = false;
+        selectedAddons.forEach(item => {
+            const addon = allAddons.find(a => a.id === item.addonId);
+            if (addon && addon.stock < item.quantity && !isEdit) {
+                alert(`Stok tidak mencukupi untuk Add-on: ${addon.name}. Sisa stok: ${addon.stock}`);
+                addonError = true;
+            }
+        });
+        if (addonError) return;
+
         const payload: CreateOrderPayload = {
             customerId: form.customerId,
             vehicleId: form.vehicleId,
@@ -126,6 +145,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
             additionalItems: form.additionalItems || undefined,
             discount: form.discount ? Number(form.discount) : undefined,
             paymentStatus: form.paymentStatus,
+            addons: selectedAddons,
         };
 
         const mutation = isEdit ? updateMutation : createMutation;
@@ -144,10 +164,18 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
     const discountPercentage = Number(form.discount) || 0;
     const discountedPrice = vehiclePrice * (1 - (discountPercentage / 100));
     const rentalCost = discountedPrice * (Number(form.rentalDays) || 0);
+
+    const addonsCost = selectedAddons.reduce((sum, item) => {
+        const addon = allAddons.find(a => a.id === item.addonId);
+        return sum + ((addon?.price || 0) * item.quantity);
+    }, 0);
+
     const locationFee = form.usageArea === 'Luar Kota' ? 100000 : 0;
     const insuranceFee = Number(form.insuranceFee) || 0;
     const pickupFee = Number(form.pickupFee) || 0;
-    const totalCost = rentalCost + locationFee + insuranceFee + pickupFee;
+    const totalCost = rentalCost + locationFee + insuranceFee + pickupFee + addonsCost;
+
+    const availableAddons = allAddons.filter(a => a.stock > 0 && selectedVehicle && a.category === selectedVehicle.type);
 
     return (
         <>
@@ -371,6 +399,92 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                             />
                         </div>
 
+                        {/* Addons Selection */}
+                        <div className="space-y-4 md:col-span-2">
+                            <Label className="text-lg font-semibold border-b pb-2 w-full block">Add-ons (Aksesoris Tambahan)</Label>
+
+                            {!selectedVehicle ? (
+                                <p className="text-sm text-muted-foreground italic">Pilih armada/kendaraan terlebih dahulu untuk melihat add-ons yang tersedia.</p>
+                            ) : availableAddons.length === 0 ? (
+                                <p className="text-sm text-muted-foreground italic">Tidak ada add-ons yang tersedia untuk tipe kendaraan ini.</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    <div className="flex gap-4">
+                                        <Select
+                                            disabled={isPending || isEdit}
+                                            value=""
+                                            onValueChange={(val) => {
+                                                if (val && !selectedAddons.find(a => a.addonId === val)) {
+                                                    setSelectedAddons([...selectedAddons, { addonId: val, quantity: 1 }]);
+                                                }
+                                            }}
+                                        >
+                                            <SelectTrigger className="w-[300px]">
+                                                <SelectValue placeholder="Pilih Add-on untuk ditambah..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availableAddons.map((addon) => (
+                                                    <SelectItem key={addon.id} value={addon.id} disabled={selectedAddons.some(a => a.addonId === addon.id)}>
+                                                        {addon.name} - {formatRupiah(addon.price)} (Sisa: {addon.stock})
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {selectedAddons.length > 0 && (
+                                        <div className="space-y-3 mt-4 border rounded-md p-4">
+                                            {selectedAddons.map((item, idx) => {
+                                                const addonObj = allAddons.find(a => a.id === item.addonId);
+                                                if (!addonObj) return null;
+                                                return (
+                                                    <div key={item.addonId} className="flex justify-between items-center bg-muted/50 p-2 rounded px-3">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium text-sm">{addonObj.name}</span>
+                                                            <span className="text-xs text-muted-foreground">{formatRupiah(addonObj.price)} / pcs</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex items-center gap-1 border rounded bg-background px-2 py-1">
+                                                                <span className="text-xs">Qty:</span>
+                                                                <Input
+                                                                    type="number"
+                                                                    value={item.quantity}
+                                                                    min="1"
+                                                                    max={addonObj.stock}
+                                                                    disabled={isEdit}
+                                                                    className="w-14 h-6 text-xs p-1 text-center border-none shadow-none focus-visible:ring-0"
+                                                                    onChange={(e) => {
+                                                                        let newQ = parseInt(e.target.value);
+                                                                        if (isNaN(newQ) || newQ < 1) newQ = 1;
+                                                                        if (newQ > addonObj.stock && !isEdit) newQ = addonObj.stock;
+                                                                        const arr = [...selectedAddons];
+                                                                        arr[idx].quantity = newQ;
+                                                                        setSelectedAddons(arr);
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <p className="font-semibold text-sm w-24 text-right">{formatRupiah(addonObj.price * item.quantity)}</p>
+                                                            {!isEdit && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    onClick={() => {
+                                                                        setSelectedAddons(selectedAddons.filter(a => a.addonId !== item.addonId));
+                                                                    }}
+                                                                    className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                                >
+                                                                    <Trash className="h-4 w-4" />
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
                         {/* Addons */}
                         <div className="space-y-2 md:col-span-2">
                             <Label>Catatan / Item Tambahan (opsional)</Label>
@@ -449,6 +563,26 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                                             <p className="font-medium text-sm text-neutral-700">Asuransi Terpilih</p>
                                             <p className="font-semibold text-base">{formatRupiah(insuranceFee)}</p>
                                         </div>
+                                        <Separator className="mb-1 mt-2" />
+                                    </>
+                                )}
+
+                                {selectedAddons.length > 0 && (
+                                    <>
+                                        <p className="font-medium text-sm text-neutral-700 mb-1 mt-2">Add-ons</p>
+                                        {selectedAddons.map(item => {
+                                            const a = allAddons.find(x => x.id === item.addonId);
+                                            // @ts-ignore
+                                            const name = a ? a.name : (item.addon?.name || 'Add-on');
+                                            // @ts-ignore
+                                            const price = a ? a.price : (item.pricePerUnit || 0);
+                                            return (
+                                                <div key={item.addonId} className="flex justify-between mb-1">
+                                                    <p className="font-medium text-sm text-neutral-700">{name} x {item.quantity}</p>
+                                                    <p className="font-semibold text-base">{formatRupiah(price * item.quantity)}</p>
+                                                </div>
+                                            )
+                                        })}
                                     </>
                                 )}
 

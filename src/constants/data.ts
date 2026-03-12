@@ -62,6 +62,13 @@ export const navItems: NavItem[] = [
                 label: 'location',
                 roles: ['admin'],
             },
+            {
+                title: 'Add-ons',
+                href: '/dashboard/addons',
+                icon: 'package',
+                label: 'addons',
+                roles: ['admin'],
+            },
         ],
     },
     {
