@@ -1,4 +1,4 @@
-'use client';
+    'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
@@ -15,6 +15,7 @@ export interface CreateOrderPayload {
     additionalItems?: string;
     paymentStatus?: string; // 'Lunas' | 'Belum Lunas'
     discount?: number;
+    addons?: { addonId: string; quantity: number }[];
 }
 
 export interface UpdateOrderPayload {
@@ -30,6 +31,7 @@ export interface UpdateOrderPayload {
     paymentStatus?: string;
     isReturned?: boolean;
     discount?: number;
+    addons?: { addonId: string; quantity: number }[];
 }
 
 export const useCreateOrder = () => {

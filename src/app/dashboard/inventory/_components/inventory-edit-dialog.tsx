@@ -45,18 +45,18 @@ export function InventoryEditDialog({ open, onOpenChange, item, onSubmit, isSubm
   }, [item, open]);
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<InventoryItem> = {};
+    const newErrors: Record<string, string> = {};
 
     if (!formData.assetName?.trim()) {
       newErrors.assetName = 'Nama aset harus diisi';
     }
 
     if (formData.quantity !== undefined && formData.quantity <= 0) {
-      (newErrors as any).quantity = 'Jumlah harus lebih dari 0';
+      newErrors.quantity = 'Jumlah harus lebih dari 0';
     }
 
     if (formData.unitPrice !== undefined && formData.unitPrice < 0) {
-      (newErrors as any).unitPrice = 'Harga satuan tidak boleh negatif';
+      newErrors.unitPrice = 'Harga satuan tidak boleh negatif';
     }
 
     if (!formData.purchaseDate) {
@@ -86,7 +86,11 @@ export function InventoryEditDialog({ open, onOpenChange, item, onSubmit, isSubm
     
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors(prev => {
+        const newErrs = { ...prev };
+        delete newErrs[field];
+        return newErrs;
+      });
     }
   };
 
@@ -110,7 +114,11 @@ export function InventoryEditDialog({ open, onOpenChange, item, onSubmit, isSubm
     }
     
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors(prev => {
+        const newErrs = { ...prev };
+        delete newErrs[field];
+        return newErrs;
+      });
     }
   };
 
@@ -163,7 +171,7 @@ export function InventoryEditDialog({ open, onOpenChange, item, onSubmit, isSubm
                 disabled={isSubmitting}
               />
               {errors.quantity && (
-                <p className="text-sm text-red-500">{errors.quantity as string}</p>
+                <p className="text-sm text-red-500">{errors.quantity}</p>
               )}
             </div>
 
@@ -180,7 +188,7 @@ export function InventoryEditDialog({ open, onOpenChange, item, onSubmit, isSubm
                 disabled={isSubmitting}
               />
               {errors.unitPrice && (
-                <p className="text-sm text-red-500">{errors.unitPrice as string}</p>
+                <p className="text-sm text-red-500">{errors.unitPrice}</p>
               )}
             </div>
           </div>
