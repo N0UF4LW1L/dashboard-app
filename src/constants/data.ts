@@ -69,6 +69,13 @@ export const navItems: NavItem[] = [
                 label: 'addons',
                 roles: ['admin'],
             },
+            {
+                title: 'Inventaris',
+                href: '/dashboard/inventory',
+                icon: 'clipboardList',
+                label: 'inventory',
+                roles: ['admin'],
+            },
         ],
     },
     {
