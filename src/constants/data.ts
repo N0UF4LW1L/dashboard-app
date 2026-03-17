@@ -84,6 +84,13 @@ export const navItems: NavItem[] = [
         roles: ['admin', 'finance', 'driver'],
         items: [
             {
+                title: 'Rekap Pencatatan',
+                href: '/dashboard/rekap-pencatatan',
+                icon: 'fileText',
+                label: 'rekap-pencatatan',
+                roles: ['admin', 'finance'],
+            },
+            {
                 title: 'Reimburse',
                 href: '/dashboard/reimburse',
                 icon: 'hand',

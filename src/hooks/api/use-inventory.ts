@@ -13,7 +13,9 @@ export const useGetInventories = (search?: string, startDate?: string, endDate?:
             if (startDate) params.startDate = startDate;
             if (endDate) params.endDate = endDate;
             const { data } = await apiClient.get('/inventories', { params });
-            return data as any[];
+            // Handle kedua shape: array (lama) atau {items, meta} (baru)
+            if (Array.isArray(data)) return data as any[];
+            return (data?.items ?? []) as any[];
         },
         enabled: typeof window !== 'undefined' && !!localStorage.getItem('access_token'),
     });
