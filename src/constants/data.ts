@@ -91,6 +91,13 @@ export const navItems: NavItem[] = [
                 roles: ['admin', 'finance'],
             },
             {
+                title: 'Realisasi',
+                href: '/dashboard/realisasi',
+                icon: 'pieChart',
+                label: 'realisasi',
+                roles: ['admin', 'finance'],
+            },
+            {
                 title: 'Reimburse',
                 href: '/dashboard/reimburse',
                 icon: 'hand',
