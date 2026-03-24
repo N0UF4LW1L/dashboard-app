@@ -42,46 +42,67 @@ export const navItems: NavItem[] = [
         roles: ['admin'],
         items: [
             {
-                title: 'Kendaraan',
+                title: 'Fleet',
                 href: '/dashboard/vehicles',
                 icon: 'truck',
                 label: 'vehicles',
                 roles: ['admin'],
             },
+        ],
+    },
+    {
+        title: 'CUSTOMER MANAGEMENT',
+        label: 'extra',
+        roles: ['admin'],
+        items: [
             {
-                title: 'Pelanggan',
+                title: 'Customers',
                 href: '/dashboard/customers',
                 icon: 'users',
                 label: 'customers',
                 roles: ['admin'],
-            },
+            }
+        ],
+    },
+    {
+        title: 'SYSTEM OPERATIONAL',
+        label: 'system-ops',
+        roles: ['admin'],
+        items: [
             {
-                title: 'Lokasi',
+                title: 'Location',
                 href: '/dashboard/location',
-                icon: 'home',
+                icon: 'home', 
                 label: 'location',
                 roles: ['admin'],
             },
             {
-                title: 'Add-ons',
+                title: 'Add-Ons',
                 href: '/dashboard/addons',
-                icon: 'package',
+                icon: 'plus', 
                 label: 'addons',
-                roles: ['admin'],
-            },
-            {
-                title: 'Inventaris',
-                href: '/dashboard/inventory',
-                icon: 'clipboardList',
-                label: 'inventory',
                 roles: ['admin'],
             },
         ],
     },
     {
-        title: 'FITUR TAMBAHAN',
-        label: 'extra',
-        roles: ['admin', 'finance', 'driver'],
+        title: 'OPERATIONAL',
+        label: 'operational',
+        roles: ['admin', 'driver'],
+        items: [
+            {
+                title: 'Reimburse',
+                href: '/dashboard/reimburse',
+                icon: 'hand',
+                label: 'reimburse',
+                roles: ['admin', 'driver'],
+            },
+        ],
+    },
+    {
+        title: 'FINANCIAL MANAGEMENT',
+        label: 'financial',
+        roles: ['admin', 'finance'],
         items: [
             {
                 title: 'Rekap Pencatatan',
@@ -91,11 +112,11 @@ export const navItems: NavItem[] = [
                 roles: ['admin', 'finance'],
             },
             {
-                title: 'Reimburse',
-                href: '/dashboard/reimburse',
-                icon: 'hand',
-                label: 'reimburse',
-                roles: ['admin', 'driver'],
+                title: 'Inventaris',
+                href: '/dashboard/inventaris',
+                icon: 'clipboardList',
+                label: 'inventaris',
+                roles: ['admin', 'finance'],
             },
         ],
     },
