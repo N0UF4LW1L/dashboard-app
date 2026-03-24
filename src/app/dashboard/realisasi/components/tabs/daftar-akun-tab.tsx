@@ -16,12 +16,13 @@ import { AccountListSkeleton, FadeInWrapper, LoadingSpinner } from "../ui/skelet
 import Swal from "sweetalert2";
 import "../ui/sweetalert-fix.css";
 import {
-  useGetAccounts,
+  useGetHierarchicalAccounts,
   useGetAccountById,
   useCreateAccount,
   useUpdateAccount,
   useDeleteAccount,
-  useReorderAccounts
+  useReorderAccounts,
+  useGetAccounts
 } from "@/hooks/api/useRealization";
 import { TabType } from "../../hooks/use-tab-state";
 import { useDebounce } from "../../hooks/use-debounce";
@@ -36,12 +37,11 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   
-  // API Hooks
-  const { data: accountsData, isLoading: accountsLoading, refetch: refetchAccounts } = useGetAccounts({ 
-    page: 1, 
-    limit: 100,
-    ...(debouncedSearchQuery && { q: debouncedSearchQuery })
-  });
+  // API Hooks — use tree endpoint so children are nested correctly
+  const { data: treeData, isLoading: accountsLoading, refetch: refetchAccounts } = useGetHierarchicalAccounts();
+
+  // Also fetch flat list (for modal header-account selector)
+  const { data: flatAccountsData } = useGetAccounts({ page: 1, limit: 200 });
   const { data: accountByIdData, isLoading: accountByIdLoading, refetch: refetchAccountById } = useGetAccountById(selectedAccountId || "");
   const createAccountMutation = useCreateAccount();
   const updateAccountMutation = useUpdateAccount();
@@ -69,29 +69,30 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
     refetchAccounts();
   }, [refetchAccounts]);
 
-  // Organize accounts into hierarchical structure
+  // Recursively add expanded=false to every node in the tree
   const organizeAccountsHierarchy = (accounts: Account[]) => {
-    console.log("Organizing accounts:", accounts);
-    
-    // Filter only root accounts (parent_id is null)
-    const rootAccounts = accounts.filter(account => !account.parent_id);
-    
-    // Add expanded property to each account and preserve children structure
-    const addExpandedProperty = (account: any) => {
-      return {
-        ...account,
-        expanded: false,
-        children: account.children && account.children.length > 0 
-          ? account.children.map(addExpandedProperty) 
-          : []
-      };
-    };
+    const addExpanded = (account: any): any => ({
+      ...account,
+      expanded: false,
+      children: (account.children ?? []).map(addExpanded),
+    });
+    return (accounts ?? []).map(addExpanded);
+  };
 
-    // Process root accounts and their children
-    const processedAccounts = rootAccounts.map(addExpandedProperty);
-    
-    console.log("Processed accounts:", processedAccounts);
-    return processedAccounts;
+  // Client-side filter on tree (searches name or code recursively)
+  const filterTree = (nodes: any[], q: string): any[] => {
+    if (!q) return nodes;
+    const lq = q.toLowerCase();
+    return nodes.reduce<any[]>((acc, node) => {
+      const filteredChildren = filterTree(node.children ?? [], lq);
+      const matches =
+        node.name.toLowerCase().includes(lq) ||
+        node.code.toLowerCase().includes(lq);
+      if (matches || filteredChildren.length > 0) {
+        acc.push({ ...node, children: filteredChildren, expanded: filteredChildren.length > 0 });
+      }
+      return acc;
+    }, []);
   };
 
   const handleAddAccount = () => {
@@ -294,7 +295,10 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
             ) : (
               <FadeInWrapper delay={200}>
                 <AccountList
-                  accounts={organizeAccountsHierarchy(accountsData?.items || [])}
+                  accounts={filterTree(
+                    organizeAccountsHierarchy(treeData || []),
+                    debouncedSearchQuery
+                  )}
                   onReorder={handleReorderAccounts}
                   onEditAccount={handleEditAccount}
                   onDeleteAccount={handleDeleteAccount}
@@ -311,7 +315,7 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
         isEditMode={isEditMode}
         formData={formData}
         onFormChange={updateFormData}
-        headerAccounts={accountsData?.items?.filter((account: Account) => account.is_header) || []}
+        headerAccounts={flatAccountsData?.items?.filter((account: Account) => account.is_header) || []}
       />
     </div>
   );

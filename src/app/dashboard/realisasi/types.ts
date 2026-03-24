@@ -19,6 +19,7 @@ export interface Account {
   sort_order: number;
   is_header: boolean;
   is_connected_to_bank: boolean;
+  is_default: boolean;
   bank_name?: string | null;
   bank_account_number?: string | null;
   initial_balance: number;
@@ -38,6 +39,7 @@ export interface TransactionCategory {
   credit_account_id: string;
   description?: string;
   is_active: boolean;
+  is_default: boolean;
   debit_account?: Account;
   credit_account?: Account;
 }

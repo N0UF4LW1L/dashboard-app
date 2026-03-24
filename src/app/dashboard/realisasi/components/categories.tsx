@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Lock } from "lucide-react";
 import { TransactionCategory, CreateTransactionCategoryData, Account } from "../types";
 import AccountFilter from "./account-filter";
 import CategoryModal from "./modals/category-modal";
@@ -50,21 +50,6 @@ export default function Categories({
     );
   }, [categories, searchQuery]);
 
-  // Check if category is a new category (can be edited/deleted)
-  // Based on the response structure, categories with specific names are system categories
-  const isNewCategory = (category: TransactionCategory) => {
-    // Categories that start with "Orderan", "Reimburse", "Inventaris", "Diskon Penjualan" are system categories
-    const systemCategoryPrefixes = [
-      "Orderan Fleets",
-      "Orderan Product", 
-      "Orderan Sewa",
-      "Reimburse",
-      "Inventaris",
-      "Diskon Penjualan"
-    ];
-    
-    return !systemCategoryPrefixes.some(prefix => category.name.startsWith(prefix));
-  };
 
   const handleAddClick = () => {
     setFormData({ name: "", debitAccountId: null, creditAccountId: null });
@@ -152,24 +137,38 @@ export default function Categories({
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Nama Kategori</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Akun Debit</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Akun Kredit</th>
+                  <th className="text-center py-3 px-4 font-medium text-gray-700">Status</th>
                   <th className="text-center py-3 px-4 font-medium text-gray-700">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCategories.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="text-center py-8 text-gray-500">
+                    <td colSpan={5} className="text-center py-8 text-gray-500">
                       {searchQuery.trim() ? 'Tidak ada kategori yang sesuai dengan pencarian' : 'Tidak ada kategori yang ditemukan'}
                     </td>
                   </tr>
                 ) : (
                   filteredCategories.map((category) => (
-                    <tr key={category.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-gray-900">{category.name}</td>
+                    <tr key={category.id} className={`border-b border-gray-100 hover:bg-gray-50 ${category.is_default ? 'bg-blue-50/40' : ''}`}>
+                      <td className="py-3 px-4 text-gray-900">
+                        <div className="flex items-center gap-2">
+                          {category.name}
+                        </div>
+                      </td>
                       <td className="py-3 px-4 text-gray-900">{category.debit_account?.name || "N/A"}</td>
                       <td className="py-3 px-4 text-gray-900">{category.credit_account?.name || "N/A"}</td>
                       <td className="py-3 px-4 text-center">
-                        {isNewCategory(category) ? (
+                        {category.is_default ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                            <Lock className="h-3 w-3" /> Default
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">Custom</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {!category.is_default ? (
                           <div className="flex items-center justify-center space-x-2">
                             <Button
                               variant="ghost"
@@ -191,7 +190,7 @@ export default function Categories({
                             </Button>
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">-</span>
+                          <span className="text-sm text-gray-400">–</span>
                         )}
                       </td>
                     </tr>

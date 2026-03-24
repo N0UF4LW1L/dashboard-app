@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, ChevronRight, Minus, GripVertical } from "lucide-react";
+import { MoreHorizontal, ChevronRight, Minus, GripVertical, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DndContext,
@@ -148,8 +148,15 @@ function AccountItem({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {account.is_default && (
+              <DropdownMenuItem disabled className="text-xs text-blue-600 gap-1">
+                <Lock className="h-3 w-3" /> Akun Default
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={() => onEditAccount?.(account.id)}>Edit</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDeleteAccount?.(account.id)}>Delete</DropdownMenuItem>
+            {!account.is_default && (
+              <DropdownMenuItem onClick={() => onDeleteAccount?.(account.id)} className="text-red-600">Delete</DropdownMenuItem>
+            )}
             <DropdownMenuItem>View Details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -268,8 +275,15 @@ function SortableAccountItem({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {account.is_default && (
+              <DropdownMenuItem disabled className="text-xs text-blue-600 gap-1">
+                <Lock className="h-3 w-3" /> Akun Default
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={() => onEditAccount?.(account.id)}>Edit</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDeleteAccount?.(account.id)}>Delete</DropdownMenuItem>
+            {!account.is_default && (
+              <DropdownMenuItem onClick={() => onDeleteAccount?.(account.id)} className="text-red-600">Delete</DropdownMenuItem>
+            )}
             <DropdownMenuItem>View Details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
