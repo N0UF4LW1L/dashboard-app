@@ -89,33 +89,38 @@ const RekapPencatatanTableWrapper = () => {
       const res = await createLainnyaMut.mutateAsync(rekapPayload);
 
       // Sync to Realisasi if category full data is provided
-      if (payload.rawCategory && payload.rawCategory.debit_account && payload.rawCategory.credit_account) {
+      if (payload.rawCategory) {
         const cat = payload.rawCategory;
-        const transactionPayload = {
-          reference_number: `RPL-${Date.now().toString().slice(-6)}`,
-          transaction_date: payload.date,
-          description: payload.name,
-          total_amount: payload.nominal,
-          category_id: cat.id,
-          notes: payload.description || "Dari modul Rekap Pencatatan Lainnya",
-          source_type: "lainnya",
-          source_id: res?.id || `RPL-${Date.now().toString().slice(-6)}`, 
-          entries: [
-            {
-              account_id: cat.debit_account.id,
-              entry_type: "DEBIT",
-              amount: payload.nominal,
-              description: payload.name
-            },
-            {
-              account_id: cat.credit_account.id,
-              entry_type: "CREDIT",
-              amount: payload.nominal,
-              description: payload.name
-            }
-          ]
-        };
-        await createFinancialTransactionMut.mutateAsync(transactionPayload);
+        const debitCatId = cat.debit_account_id || cat.debitAccount?.id || cat.debit_account?.id;
+        const creditCatId = cat.credit_account_id || cat.creditAccount?.id || cat.credit_account?.id;
+
+        if (debitCatId && creditCatId) {
+          const transactionPayload = {
+            reference_number: `RPL-${Date.now().toString().slice(-6)}`,
+            transaction_date: payload.date,
+            description: payload.name,
+            total_amount: payload.nominal,
+            category_id: cat.id,
+            notes: payload.description || "Dari modul Rekap Pencatatan Lainnya",
+            source_type: "lainnya",
+            source_id: res?.id || `RPL-${Date.now().toString().slice(-6)}`, 
+            entries: [
+              {
+                account_id: debitCatId,
+                entry_type: "DEBIT",
+                amount: payload.nominal,
+                description: payload.name
+              },
+              {
+                account_id: creditCatId,
+                entry_type: "CREDIT",
+                amount: payload.nominal,
+                description: payload.name
+              }
+            ]
+          };
+          await createFinancialTransactionMut.mutateAsync(transactionPayload);
+        }
       }
 
       toast.success("Data berhasil ditambahkan dan disinkronisasi ke Realisasi");

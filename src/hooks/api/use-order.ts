@@ -11,7 +11,7 @@ export const useGetOrders = () => {
         queryKey: ['orders'],
         queryFn: async () => {
             const { data } = await apiClient.get('/orders');
-            return data as any[];
+            return (data?.items || data?.data || data || []) as any[];
         },
         enabled: typeof window !== 'undefined' && !!localStorage.getItem('access_token'),
     });
@@ -23,7 +23,7 @@ export const useOrdersStatusCount = () => {
         queryKey: ['orders', 'status-count'],
         queryFn: async () => {
             const { data } = await apiClient.get('/orders');
-            const orders = data as any[];
+            const orders = (data?.items || data?.data || data || []) as any[];
 
             const lunas = orders.filter((o) => o.paymentStatus === 'Lunas').length;
             const belumLunas = orders.filter((o) => o.paymentStatus === 'Belum Lunas').length;

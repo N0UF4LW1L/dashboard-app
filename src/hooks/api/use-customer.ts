@@ -9,7 +9,7 @@ export const useGetCustomers = () => {
         queryKey: ['customers'],
         queryFn: async () => {
             const { data } = await apiClient.get('/customers');
-            return data as any[];
+            return (data?.items || data?.data || data || []) as any[];
         },
         enabled: typeof window !== 'undefined' && !!localStorage.getItem('access_token'),
     });
@@ -21,7 +21,7 @@ export const useCustomersStatusCount = () => {
         queryKey: ['customers', 'status-count'],
         queryFn: async () => {
             const { data } = await apiClient.get('/customers');
-            const customers = data as any[];
+            const customers = (data?.items || data?.data || data || []) as any[];
             return {
                 data: [
                     { status: 'Total', count: customers.length },
