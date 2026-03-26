@@ -11,6 +11,7 @@ import { formatRupiah } from "@/lib/utils";
 import BreadCrumb from "@/components/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { Heading } from "@/components/ui/heading";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -29,15 +30,20 @@ export default function DetailAkunPage() {
   const startDateParam = searchParams.get('start_date');
   const endDateParam = searchParams.get('end_date');
   
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: startDateParam ? dayjs(startDateParam).toDate() : dayjs().startOf('month').toDate(),
-    to: endDateParam ? dayjs(endDateParam).toDate() : dayjs().endOf('month').toDate(),
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    if (startDateParam || endDateParam) {
+      return {
+        from: startDateParam ? dayjs(startDateParam).toDate() : undefined,
+        to: endDateParam ? dayjs(endDateParam).toDate() : undefined,
+      };
+    }
+    return undefined;
   });
 
   const { data: accountData, isLoading: accountLoading } = useGetAccountById(accountId);
   
-  const formattedStartDate = dateRange.from ? dayjs(dateRange.from).format('YYYY-MM-DD') : undefined;
-  const formattedEndDate = dateRange.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : undefined;
+  const formattedStartDate = dateRange?.from ? dayjs(dateRange.from).format('YYYY-MM-DD') : undefined;
+  const formattedEndDate = dateRange?.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : undefined;
 
   const { data: transactionsData, isLoading: transactionsLoading } = useGetFinancialTransactions({
     account_id: accountId,
@@ -47,9 +53,7 @@ export default function DetailAkunPage() {
   });
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
-    if (range) {
-      setDateRange(range);
-    }
+    setDateRange(range);
   };
 
   const breadcrumbItems = [
@@ -97,7 +101,8 @@ export default function DetailAkunPage() {
                     placeholder="Pilih tanggal mulai"
                     value={formattedStartDate || ''}
                     onChange={(e) => {
-                      const newRange = { ...dateRange, from: e.target.value ? dayjs(e.target.value).toDate() : undefined };
+                      const val = e.target.value;
+                      const newRange = { ...(dateRange || {}), from: val ? dayjs(val).toDate() : undefined };
                       handleDateRangeChange(newRange as DateRange);
                     }}
                   />
@@ -112,7 +117,8 @@ export default function DetailAkunPage() {
                     placeholder="Pilih tanggal akhir"
                     value={formattedEndDate || ''}
                     onChange={(e) => {
-                      const newRange = { ...dateRange, to: e.target.value ? dayjs(e.target.value).toDate() : undefined };
+                      const val = e.target.value;
+                      const newRange = { ...(dateRange || {}), to: val ? dayjs(val).toDate() : undefined };
                       handleDateRangeChange(newRange as DateRange);
                     }}
                   />

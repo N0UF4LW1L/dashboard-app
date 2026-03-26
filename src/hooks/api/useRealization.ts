@@ -19,10 +19,15 @@ interface GetAccountsParams {
 }
 
 // Helper to normalize backend response { success, data, meta } => { items, meta }
-const normalizeListResponse = (response: any) => ({
-  items: response?.data || [],
-  meta: response?.meta || {},
-});
+const normalizeListResponse = (response: any) => {
+  if (Array.isArray(response)) {
+    return { items: response, meta: {} };
+  }
+  return {
+    items: response?.items || response?.data || [],
+    meta: response?.meta || {},
+  };
+};
 
 export const useGetAccounts = (params: GetAccountsParams = {}, options = {}) => {
   const getAccounts = async () => {

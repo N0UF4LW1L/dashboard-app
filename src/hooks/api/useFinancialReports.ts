@@ -118,8 +118,8 @@ export interface GetGeneralJournalParams {
 }
 
 export interface GetGeneralLedgerParams {
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface GeneralLedgerEntry {
@@ -214,7 +214,6 @@ export const useGetGeneralLedger = (params: GetGeneralLedgerParams, options = {}
   return useQuery({
     queryKey: ['general-ledger', params],
     queryFn: getGeneralLedger,
-    enabled: !!params.startDate && !!params.endDate,
     ...options,
   });
 };

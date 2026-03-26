@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarDateRangePicker } from "@/components/date-range-picker";
 import { Download, Search, BookOpen } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import { startOfMonth, endOfMonth } from "date-fns";
 import dayjs from "dayjs";
 import { TabType } from "../../hooks/use-tab-state";
 import { useDebounce } from "../../hooks/use-debounce";
@@ -34,16 +35,10 @@ export default function BukuBesarTab({ registerRefetchCallback }: BukuBesarTabPr
   const router = useRouter();
   
   // Date State
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    return {
-      from: startOfMonth(new Date()),
-      to: endOfMonth(new Date())
-    };
-  });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   
   // Search State
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: locationsData } = useGetLocations({ page: 1, limit: 100 }) as any;
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Tab State
@@ -51,8 +46,8 @@ export default function BukuBesarTab({ registerRefetchCallback }: BukuBesarTabPr
 
   // API Call
   const { data: generalLedgerData, isLoading, refetch } = useGetGeneralLedger({
-    startDate: dateRange.from ? dayjs(dateRange.from).format('YYYY-MM-DD') : dayjs().startOf('month').format('YYYY-MM-DD'),
-    endDate: dateRange.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : dayjs().endOf('month').format('YYYY-MM-DD'),
+    startDate: dateRange?.from ? dayjs(dateRange.from).format('YYYY-MM-DD') : undefined,
+    endDate: dateRange?.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : undefined,
   });
 
   // Register refetch
@@ -94,7 +89,7 @@ export default function BukuBesarTab({ registerRefetchCallback }: BukuBesarTabPr
             <CardTitle className="text-xl font-bold">Buku Besar Realisasi</CardTitle>
           </div>
           <CardDescription>
-            Periode: {dateRange.from ? dayjs(dateRange.from).format('DD/MM/YYYY') : '-'} - {dateRange.to ? dayjs(dateRange.to).format('DD/MM/YYYY') : '-'}
+            Periode: {dateRange?.from ? dayjs(dateRange.from).format('DD/MM/YYYY') : 'Semua Waktu'} {dateRange?.to ? `- ${dayjs(dateRange.to).format('DD/MM/YYYY')}` : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -127,36 +122,6 @@ export default function BukuBesarTab({ registerRefetchCallback }: BukuBesarTabPr
                   <Button variant="outline" className="gap-2">
                     <Download className="h-4 w-4" /> CSV
                   </Button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground font-medium">Tipe Kendaraan</Label>
-                    <Select defaultValue="semua">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Semua Tipe" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="semua">Semua Tipe</SelectItem>
-                        <SelectItem value="mobil">Mobil</SelectItem>
-                        <SelectItem value="motor">Motor</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground font-medium">Cabang/Lokasi</Label>
-                    <Select defaultValue="semua">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Semua Lokasi" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="semua">Semua Lokasi</SelectItem>
-                        {locationsData?.items?.map((loc: any) => (
-                           <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
               </div>
 
@@ -210,12 +175,17 @@ export default function BukuBesarTab({ registerRefetchCallback }: BukuBesarTabPr
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredData.map((row: any) => (
-                        <TableRow 
-                          key={row.account_id}
-                          className="hover:bg-slate-50 cursor-pointer transition-colors"
-                          onClick={() => router.push(`/dashboard/realisasi/akun/${row.account_id}?start_date=${dayjs(dateRange.from).format('YYYY-MM-DD')}&end_date=${dayjs(dateRange.to).format('YYYY-MM-DD')}`)}
-                        >
+                      filteredData.map((row: any) => {
+                        const qs = new URLSearchParams();
+                        if (dateRange?.from) qs.append('start_date', dayjs(dateRange.from).format('YYYY-MM-DD'));
+                        if (dateRange?.to) qs.append('end_date', dayjs(dateRange.to).format('YYYY-MM-DD'));
+                        const queryParams = qs.toString() ? `?${qs.toString()}` : '';
+                        return (
+                          <TableRow 
+                            key={row.account_id}
+                            className="hover:bg-slate-50 cursor-pointer transition-colors"
+                            onClick={() => router.push(`/dashboard/realisasi/akun/${row.account_id}${queryParams}`)}
+                          >
                           <TableCell className="font-medium text-slate-700">{row.account_code}</TableCell>
                           <TableCell>{row.account_name}</TableCell>
                           <TableCell>
@@ -228,7 +198,8 @@ export default function BukuBesarTab({ registerRefetchCallback }: BukuBesarTabPr
                           <TableCell className="text-right">{row.total_credit === 0 ? '-' : formatRupiah(row.total_credit)}</TableCell>
                           <TableCell className="text-right font-medium text-slate-900">{formatRupiah(row.final_balance)}</TableCell>
                         </TableRow>
-                      ))
+                        );
+                      })
                     )}
                   </TableBody>
                 </Table>
