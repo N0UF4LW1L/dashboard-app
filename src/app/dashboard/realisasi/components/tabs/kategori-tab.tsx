@@ -27,6 +27,7 @@ export default function KategoriTab({ registerRefetchCallback }: KategoriTabProp
   const { data: categoriesData, isLoading: categoriesLoading, refetch: refetchCategories } = useGetTransactionCategories({ 
     page: 1, 
     limit: 1000, // Get all categories for client-side filtering
+    is_active: true,
   });
   const { data: accountsData } = useGetAccounts({ page: 1, limit: 1000 });
   const createCategoryMutation = useCreateTransactionCategory();

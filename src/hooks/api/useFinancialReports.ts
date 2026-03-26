@@ -117,13 +117,29 @@ export interface GetGeneralJournalParams {
   q?: string;
 }
 
+export interface GetGeneralLedgerParams {
+  startDate: string;
+  endDate: string;
+}
+
+export interface GeneralLedgerEntry {
+  account_id: string;
+  account_code: string;
+  account_name: string;
+  account_type: string;
+  initial_balance: number;
+  total_debit: number;
+  total_credit: number;
+  final_balance: number;
+}
+
 // React Query Hooks
 export const useGetBalanceSheet = (params: GetBalanceSheetParams, options = {}) => {
   const getBalanceSheet = async () => {
     const { data } = await apiClient.get('/realization/reports/balance-sheet', {
       params: { as_of_date: params.asOfDate }
     });
-    return data;
+    return data.data;
   };
 
   return useQuery({
@@ -139,7 +155,7 @@ export const useGetProfitLoss = (params: GetProfitLossParams, options = {}) => {
     const { data } = await apiClient.get('/realization/reports/profit-loss', {
       params: { start_date: params.startDate, end_date: params.endDate }
     });
-    return data;
+    return data.data;
   };
 
   return useQuery({
@@ -155,7 +171,7 @@ export const useGetCashFlow = (params: GetCashFlowParams, options = {}) => {
     const { data } = await apiClient.get('/realization/reports/cash-flow', {
       params: { start_date: params.startDate, end_date: params.endDate }
     });
-    return data;
+    return data.data;
   };
 
   return useQuery({
@@ -176,12 +192,28 @@ export const useGetGeneralJournal = (params: GetGeneralJournalParams, options = 
         q: params.q
       }
     });
-    return data;
+    return data.data;
   };
 
   return useQuery({
     queryKey: ['general-journal', params],
     queryFn: getGeneralJournal,
+    enabled: !!params.startDate && !!params.endDate,
+    ...options,
+  });
+};
+
+export const useGetGeneralLedger = (params: GetGeneralLedgerParams, options = {}) => {
+  const getGeneralLedger = async () => {
+    const { data } = await apiClient.get('/realization/reports/general-ledger', {
+      params: { start_date: params.startDate, end_date: params.endDate }
+    });
+    return data.data;
+  };
+
+  return useQuery({
+    queryKey: ['general-ledger', params],
+    queryFn: getGeneralLedger,
     enabled: !!params.startDate && !!params.endDate,
     ...options,
   });

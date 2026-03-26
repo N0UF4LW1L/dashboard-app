@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
-export type TabType = "daftar-akun" | "daftar-rekening" | "transaksi" | "laporan" | "kategori";
+export type TabType = "daftar-akun" | "buku-besar" | "transaksi" | "laporan" | "kategori";
 
 export function useTabState() {
   const searchParams = useSearchParams();
@@ -24,7 +24,7 @@ export function useTabState() {
   // Initialize tab from URL params
   useEffect(() => {
     const tabFromUrl = searchParams.get("tab") as TabType;
-    if (tabFromUrl && ["daftar-akun", "daftar-rekening", "transaksi", "laporan", "kategori"].includes(tabFromUrl)) {
+    if (tabFromUrl && ["daftar-akun", "buku-besar", "transaksi", "laporan", "kategori"].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
     }
   }, [searchParams]);

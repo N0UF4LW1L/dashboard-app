@@ -57,7 +57,7 @@ export default function TransaksiTab({ registerRefetchCallback }: TransaksiTabPr
     // No filters for all data export
   });
   const { data: accountsData } = useGetAccounts({ page: 1, limit: 1000 });
-  const { data: categoriesData } = useGetTransactionCategories({ page: 1, limit: 1000 });
+  const { data: categoriesData } = useGetTransactionCategories({ page: 1, limit: 1000, is_active: true });
   const createTransactionMutation = useCreateFinancialTransaction();
   const updateTransactionMutation = useUpdateFinancialTransaction();
   const deleteTransactionMutation = useDeleteFinancialTransaction();

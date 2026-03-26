@@ -11,7 +11,7 @@ import { useTabState } from "./hooks/use-tab-state";
 
 // Import tab components
 import DaftarAkunTab from "./components/tabs/daftar-akun-tab";
-import DaftarRekeningTab from "./components/tabs/daftar-rekening-tab";
+import BukuBesarTab from "./components/tabs/buku-besar-tab";
 import TransaksiTab from "./components/tabs/transaksi-tab";
 import LaporanTab from "./components/tabs/laporan-tab";
 import KategoriTab from "./components/tabs/kategori-tab";
@@ -34,7 +34,7 @@ function RealisasiContent() {
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="daftar-akun">Daftar Akun</TabsTrigger>
-            <TabsTrigger value="daftar-rekening">Daftar Rekening</TabsTrigger>
+            <TabsTrigger value="buku-besar">Buku Besar</TabsTrigger>
             <TabsTrigger value="transaksi">Transaksi</TabsTrigger>
             <TabsTrigger value="laporan">Laporan</TabsTrigger>
             <TabsTrigger value="kategori">Kategori</TabsTrigger>
@@ -45,9 +45,9 @@ function RealisasiContent() {
             <DaftarAkunTab registerRefetchCallback={registerRefetchCallback} />
           </TabsContent>
 
-          {/* Daftar Rekening Tab */}
-          <TabsContent value="daftar-rekening" className="space-y-4">
-            <DaftarRekeningTab registerRefetchCallback={registerRefetchCallback} />
+          {/* Buku Besar Tab */}
+          <TabsContent value="buku-besar" className="space-y-4">
+            <BukuBesarTab registerRefetchCallback={registerRefetchCallback} />
           </TabsContent>
 
           {/* Transaksi Tab */}

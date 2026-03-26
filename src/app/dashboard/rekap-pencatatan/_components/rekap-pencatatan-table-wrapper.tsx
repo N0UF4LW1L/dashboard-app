@@ -39,6 +39,7 @@ import * as XLSX from "xlsx";
 import { apiClient } from "@/lib/api-client";
 import { RekapLainnyaForm } from "./rekap-lainnya-form";
 import { useCreateLainnya } from "@/hooks/api/use-rekap-mutations";
+import { useCreateFinancialTransaction } from "@/hooks/api/useRealization";
 import { toast } from "sonner";
 
 const Spinner = () => (
@@ -72,16 +73,56 @@ const RekapPencatatanTableWrapper = () => {
 
   const [showForm, setShowForm] = React.useState(false);
   const createLainnyaMut = useCreateLainnya();
+  const createFinancialTransactionMut = useCreateFinancialTransaction();
 
   const [activeTab, setActiveTab] = React.useState<string>(defaultTab);
 
   const handleFormSubmit = async (payload: any) => {
     try {
-      await createLainnyaMut.mutateAsync(payload);
-      toast.success("Data berhasil ditambahkan");
+      const rekapPayload = {
+        name: payload.name,
+        category: payload.categoryName || payload.category, // store name
+        nominal: payload.nominal,
+        date: payload.date,
+        description: payload.description
+      };
+      const res = await createLainnyaMut.mutateAsync(rekapPayload);
+
+      // Sync to Realisasi if category full data is provided
+      if (payload.rawCategory && payload.rawCategory.debit_account && payload.rawCategory.credit_account) {
+        const cat = payload.rawCategory;
+        const transactionPayload = {
+          reference_number: `RPL-${Date.now().toString().slice(-6)}`,
+          transaction_date: payload.date,
+          description: payload.name,
+          total_amount: payload.nominal,
+          category_id: cat.id,
+          notes: payload.description || "Dari modul Rekap Pencatatan Lainnya",
+          source_type: "lainnya",
+          source_id: res?.id || `RPL-${Date.now().toString().slice(-6)}`, 
+          entries: [
+            {
+              account_id: cat.debit_account.id,
+              entry_type: "DEBIT",
+              amount: payload.nominal,
+              description: payload.name
+            },
+            {
+              account_id: cat.credit_account.id,
+              entry_type: "CREDIT",
+              amount: payload.nominal,
+              description: payload.name
+            }
+          ]
+        };
+        await createFinancialTransactionMut.mutateAsync(transactionPayload);
+      }
+
+      toast.success("Data berhasil ditambahkan dan disinkronisasi ke Realisasi");
       setShowForm(false);
     } catch (e) {
       toast.error("Terjadi kesalahan saat menambahkan data");
+      console.error(e);
     }
   };
 
