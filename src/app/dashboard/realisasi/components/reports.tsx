@@ -9,7 +9,7 @@ export default function Reports() {
   const router = useRouter();
 
   const handleCardClick = (reportType: string) => {
-    router.push(`/dashboard/realisasi/laporan-keuangan/${reportType}`);
+    router.push(`/dashboard/realisasi/${reportType}`);
   };
 
   return (
