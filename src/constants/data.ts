@@ -98,6 +98,13 @@ export const navItems: NavItem[] = [
                 roles: ['admin', 'finance'],
             },
             {
+                title: 'Perencanaan',
+                href: '/dashboard/perencanaan',
+                icon: 'chart',
+                label: 'perencanaan',
+                roles: ['admin', 'finance'],
+            },
+            {
                 title: 'Reimburse',
                 href: '/dashboard/reimburse',
                 icon: 'hand',
