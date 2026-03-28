@@ -226,7 +226,7 @@ export const useGetPlanningCashFlow = (
 
 export const useGetPlanningJournal = (
   planningId: string,
-  params?: { page?: number; limit?: number; startDate?: string; endDate?: string },
+  params?: { page?: number; limit?: number; date_from?: string; date_to?: string },
 ) => {
   return useQuery({
     queryKey: ['planning-jurnal', planningId, params],

@@ -27,6 +27,106 @@ export default function PlanningLabaRugiPage() {
   });
   const [activeTab, setActiveTab] = useState("data");
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async (format: 'excel' | 'csv') => {
+    if (!data) {
+      toast.error('Tidak ada data untuk diekspor');
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const exportData = [];
+      
+      // Header
+      exportData.push({ 'No Akun': 'No Akun', 'Nama Akun': 'Nama Akun', 'Pendapatan': 'Pendapatan', 'Beban': 'Beban' });
+
+      // Revenue
+      exportData.push({ 'No Akun': '', 'Nama Akun': 'PENDAPATAN', 'Pendapatan': '', 'Beban': '' });
+      revenue.forEach((item: any) => {
+        exportData.push({
+          'No Akun': item.account_code,
+          'Nama Akun': item.account_name,
+          'Pendapatan': item.running_balance,
+          'Beban': 0
+        });
+      });
+      exportData.push({ 'No Akun': '', 'Nama Akun': 'TOTAL PENDAPATAN', 'Pendapatan': totalRevenue, 'Beban': '' });
+
+      // Empty row
+      exportData.push({ 'No Akun': '', 'Nama Akun': '', 'Pendapatan': '', 'Beban': '' });
+
+      // Expenses
+      exportData.push({ 'No Akun': '', 'Nama Akun': 'BEBAN', 'Pendapatan': '', 'Beban': '' });
+      expenses.forEach((item: any) => {
+        exportData.push({
+          'No Akun': item.account_code,
+          'Nama Akun': item.account_name,
+          'Pendapatan': 0,
+          'Beban': item.running_balance
+        });
+      });
+      exportData.push({ 'No Akun': '', 'Nama Akun': 'TOTAL BEBAN', 'Pendapatan': '', 'Beban': totalExpenses });
+
+      // Net Profit
+      exportData.push({ 'No Akun': '', 'Nama Akun': 'LABA BERSIH', 'Pendapatan': netProfit, 'Beban': '' });
+
+      const filename = `laba_rugi_perencanaan_${planning?.name || planningId}_${dayjs().format('YYYY-MM-DD')}`;
+      
+      if (format === 'csv') {
+        const csvContent = convertToCSV(exportData);
+        downloadFile(csvContent, `${filename}.csv`, 'text/csv');
+      } else {
+        const excelContent = convertToExcel(exportData);
+        downloadFile(excelContent, `${filename}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', true);
+      }
+      
+      toast.success(`Data berhasil diekspor dalam format ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error('Gagal mengekspor data');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const convertToCSV = (data: any[]) => {
+    if (data.length === 0) return '';
+    const headers = Object.keys(data[0]);
+    const csvHeaders = headers.join(',');
+    const csvRows = data.map(row => 
+      headers.map(header => {
+        const value = row[header];
+        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
+      }).join(',')
+    );
+    return [csvHeaders, ...csvRows].join('\n');
+  };
+
+  const convertToExcel = (data: any[]) => {
+    const XLSX = require('xlsx');
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Laba Rugi");
+    return XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  };
+
+  const downloadFile = (content: any, filename: string, mimeType: string, isExcel: boolean = false) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
   const { data: planningData } = useGetDetailPlanning(planningId);
   const { data, isLoading, error, refetch } = useGetPlanningProfitLoss(planningId, {
     startDate: dateRange.from ? dayjs(dateRange.from).format("YYYY-MM-DD") : undefined,
@@ -110,10 +210,10 @@ export default function PlanningLabaRugiPage() {
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="min-w-[120px]">
+                      <Button onClick={() => handleExport('excel')} variant="outline" size="sm" className="min-w-[120px]" disabled={isExporting}>
                         <Download className="h-4 w-4 mr-2" /> Excel
                       </Button>
-                      <Button variant="outline" size="sm" className="min-w-[120px]">
+                      <Button onClick={() => handleExport('csv')} variant="outline" size="sm" className="min-w-[120px]" disabled={isExporting}>
                         <Download className="h-4 w-4 mr-2" /> CSV
                       </Button>
                     </div>

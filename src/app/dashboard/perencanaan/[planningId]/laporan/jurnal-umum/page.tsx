@@ -27,10 +27,92 @@ export default function PlanningJurnalUmumPage() {
   });
   const [activeTab, setActiveTab] = useState("data");
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async (format: 'excel' | 'csv') => {
+    if (!entries.length) {
+      toast.error('Tidak ada data untuk diekspor');
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const exportData: any[] = [];
+      exportData.push({ 'Tanggal': 'Tanggal', 'Keterangan / Akun': 'Keterangan / Akun', 'Debit': 'Debit', 'Kredit': 'Kredit' });
+
+      entries.forEach((entry: any) => {
+        // Debit row
+        exportData.push({
+          'Tanggal': dayjs(entry.date).format("DD/MM/YYYY"),
+          'Keterangan / Akun': entry.debit_account ? `${entry.debit_account.code} - ${entry.debit_account.name}` : '–',
+          'Debit': entry.amount,
+          'Kredit': 0
+        });
+        // Credit row
+        exportData.push({
+          'Tanggal': '',
+          'Keterangan / Akun': entry.credit_account ? `    ${entry.credit_account.code} - ${entry.credit_account.name}` : '    –',
+          'Debit': 0,
+          'Kredit': entry.amount
+        });
+      });
+
+      const filename = `jurnal_umum_perencanaan_${planning?.name || planningId}_${dayjs().format('YYYY-MM-DD')}`;
+      
+      if (format === 'csv') {
+        const csvContent = convertToCSV(exportData);
+        downloadFile(csvContent, `${filename}.csv`, 'text/csv');
+      } else {
+        const excelContent = convertToExcel(exportData);
+        downloadFile(excelContent, `${filename}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', true);
+      }
+      toast.success(`Data berhasil diekspor dalam format ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error('Gagal mengekspor data');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const convertToCSV = (data: any[]) => {
+    if (data.length === 0) return '';
+    const headers = Object.keys(data[0]);
+    const csvHeaders = headers.join(',');
+    const csvRows = data.map(row => headers.map(header => {
+      const value = row[header];
+      if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+        return `"${value.replace(/"/g, '""')}"`;
+      }
+      return value;
+    }).join(','));
+    return [csvHeaders, ...csvRows].join('\n');
+  };
+
+  const convertToExcel = (data: any[]) => {
+    const XLSX = require('xlsx');
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Jurnal Umum");
+    return XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  };
+
+  const downloadFile = (content: any, filename: string, mimeType: string, isExcel: boolean = false) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
   const { data: planningData } = useGetDetailPlanning(planningId);
   const { data, isLoading, error, refetch } = useGetPlanningJournal(planningId, {
-    startDate: dateRange.from ? dayjs(dateRange.from).format("YYYY-MM-DD") : undefined,
-    endDate: dateRange.to ? dayjs(dateRange.to).format("YYYY-MM-DD") : undefined,
+    date_from: dateRange.from ? dayjs(dateRange.from).format("YYYY-MM-DD") : undefined,
+    date_to: dateRange.to ? dayjs(dateRange.to).format("YYYY-MM-DD") : undefined,
     limit: 200,
   });
 
@@ -102,10 +184,10 @@ export default function PlanningJurnalUmumPage() {
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="min-w-[120px]">
+                      <Button onClick={() => handleExport('excel')} variant="outline" size="sm" className="min-w-[120px]" disabled={isExporting}>
                         <Download className="h-4 w-4 mr-2" /> Excel
                       </Button>
-                      <Button variant="outline" size="sm" className="min-w-[120px]">
+                      <Button onClick={() => handleExport('csv')} variant="outline" size="sm" className="min-w-[120px]" disabled={isExporting}>
                         <Download className="h-4 w-4 mr-2" /> CSV
                       </Button>
                     </div>

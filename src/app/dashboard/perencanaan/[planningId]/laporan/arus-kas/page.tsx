@@ -27,6 +27,92 @@ export default function PlanningArusKasPage() {
   });
   const [activeTab, setActiveTab] = useState("data");
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async (format: 'excel' | 'csv') => {
+    if (!data) {
+      toast.error('Tidak ada data untuk diekspor');
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const exportData = [];
+      exportData.push({ 'No Akun': 'No Akun', 'Nama Akun': 'Nama Akun', 'Operasional': 'Operasional', 'Investasi': 'Investasi', 'Pendanaan': 'Pendanaan' });
+
+      // Operating
+      exportData.push({ 'No Akun': '', 'Nama Akun': 'AKTIVITAS OPERASIONAL', 'Operasional': '', 'Investasi': '', 'Pendanaan': '' });
+      operating.forEach((item: any) => {
+        exportData.push({ 'No Akun': item.account_code, 'Nama Akun': item.account_name, 'Operasional': item.running_balance || 0, 'Investasi': 0, 'Pendanaan': 0 });
+      });
+
+      // Investing
+      exportData.push({ 'No Akun': '', 'Nama Akun': 'AKTIVITAS INVESTASI', 'Operasional': '', 'Investasi': '', 'Pendanaan': '' });
+      investing.forEach((item: any) => {
+        exportData.push({ 'No Akun': item.account_code, 'Nama Akun': item.account_name, 'Operasional': 0, 'Investasi': item.running_balance || 0, 'Pendanaan': 0 });
+      });
+
+      // Financing
+      exportData.push({ 'No Akun': '', 'Nama Akun': 'AKTIVITAS PENDANAAN', 'Operasional': '', 'Investasi': '', 'Pendanaan': '' });
+      financing.forEach((item: any) => {
+        exportData.push({ 'No Akun': item.account_code, 'Nama Akun': item.account_name, 'Operasional': 0, 'Investasi': 0, 'Pendanaan': item.running_balance || 0 });
+      });
+
+      // Net Cash Flow
+      exportData.push({ 'No Akun': '', 'Nama Akun': 'NET CASH FLOW', 'Operasional': netCashFlow, 'Investasi': '', 'Pendanaan': '' });
+
+      const filename = `arus_kas_perencanaan_${planning?.name || planningId}_${dayjs().format('YYYY-MM-DD')}`;
+      
+      if (format === 'csv') {
+        const csvContent = convertToCSV(exportData);
+        downloadFile(csvContent, `${filename}.csv`, 'text/csv');
+      } else {
+        const excelContent = convertToExcel(exportData);
+        downloadFile(excelContent, `${filename}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', true);
+      }
+      toast.success(`Data berhasil diekspor dalam format ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error('Gagal mengekspor data');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const convertToCSV = (data: any[]) => {
+    if (data.length === 0) return '';
+    const headers = Object.keys(data[0]);
+    const csvHeaders = headers.join(',');
+    const csvRows = data.map(row => headers.map(header => {
+      const value = row[header];
+      if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+        return `"${value.replace(/"/g, '""')}"`;
+      }
+      return value;
+    }).join(','));
+    return [csvHeaders, ...csvRows].join('\n');
+  };
+
+  const convertToExcel = (data: any[]) => {
+    const XLSX = require('xlsx');
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Arus Kas");
+    return XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  };
+
+  const downloadFile = (content: any, filename: string, mimeType: string, isExcel: boolean = false) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
   const { data: planningData } = useGetDetailPlanning(planningId);
   const { data, isLoading, error, refetch } = useGetPlanningCashFlow(planningId, {
     startDate: dateRange.from ? dayjs(dateRange.from).format("YYYY-MM-DD") : undefined,
@@ -53,24 +139,6 @@ export default function PlanningArusKasPage() {
   const financing = data?.financing_activities || [];
   const netCashFlow = data?.net_cash_flow || 0;
 
-  const renderSection = (title: string, items: any[], color: string) => (
-    <>
-      <tr className={`${color} border-b border-gray-200`}>
-        <td colSpan={3} className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-900 text-center">{title}</td>
-      </tr>
-      {items.length === 0 ? (
-        <tr className="bg-white border-b border-gray-200"><td colSpan={3} className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-500 italic border-r border-gray-300">Belum ada data</td></tr>
-      ) : items.map((item: any, i: number) => (
-        <tr key={i} className="bg-white hover:bg-gray-50 border-b border-gray-200">
-          <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">{item.account_code}</td>
-          <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">{item.account_name}</td>
-          <td className={`py-2 px-2 sm:px-4 text-xs sm:text-sm text-right font-medium whitespace-nowrap ${item.running_balance >= 0 ? "text-green-700" : "text-red-600"}`}>
-            {formatCurrency(item.running_balance)}
-          </td>
-        </tr>
-      ))}
-    </>
-  );
 
   return (
     <>
@@ -122,10 +190,10 @@ export default function PlanningArusKasPage() {
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="min-w-[120px]">
+                      <Button onClick={() => handleExport('excel')} variant="outline" size="sm" className="min-w-[120px]" disabled={isExporting}>
                         <Download className="h-4 w-4 mr-2" /> Excel
                       </Button>
-                      <Button variant="outline" size="sm" className="min-w-[120px]">
+                      <Button onClick={() => handleExport('csv')} variant="outline" size="sm" className="min-w-[120px]" disabled={isExporting}>
                         <Download className="h-4 w-4 mr-2" /> CSV
                       </Button>
                     </div>
@@ -133,32 +201,78 @@ export default function PlanningArusKasPage() {
 
                   <div className="border rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
-                      <table className="w-full border-collapse min-w-[600px]">
+                      <table className="w-full border-collapse min-w-[700px]">
                         <thead>
                           <tr className="border-b border-gray-200 bg-gray-50">
-                            <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-300 text-xs sm:text-sm">No Akun</th>
-                            <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-300 text-xs sm:text-sm">Nama Akun</th>
-                            <th className="text-right py-3 px-4 font-medium text-gray-700 text-xs sm:text-sm w-44">Jumlah</th>
+                            <th className="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-700 border-r border-gray-300 text-xs sm:text-sm">No Akun</th>
+                            <th className="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-700 border-r border-gray-300 text-xs sm:text-sm">Nama Akun</th>
+                            <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-700 border-r border-gray-300 text-xs sm:text-sm">Arus Kas Operasi</th>
+                            <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-700 border-r border-gray-300 text-xs sm:text-sm">Arus Kas Investasi</th>
+                            <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-700 text-xs sm:text-sm">Arus Kas Pendanaan</th>
                           </tr>
                         </thead>
                         <tbody>
                           {isLoading ? (
-                            <tr><td colSpan={3} className="py-12 text-center text-gray-500"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2" />Loading...</td></tr>
-                          ) : (
+                            <tr><td colSpan={5} className="py-12 text-center text-gray-500"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2" />Loading...</td></tr>
+                          ) : data ? (
                             <>
-                              {renderSection("ARUS KAS DARI AKTIVITAS OPERASI", operating, "bg-gray-100")}
-                              <tr><td colSpan={3} className="py-1 sm:py-2" /></tr>
-                              {renderSection("ARUS KAS DARI AKTIVITAS INVESTASI", investing, "bg-gray-100")}
-                              <tr><td colSpan={3} className="py-1 sm:py-2" /></tr>
-                              {renderSection("ARUS KAS DARI AKTIVITAS PENDANAAN", financing, "bg-gray-100")}
-                              <tr><td colSpan={3} className="py-1 sm:py-2" /></tr>
-                              <tr className="bg-gray-100 border-t-2 border-gray-400 border-b">
-                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-bold text-gray-900 text-center border-r border-gray-300" colSpan={2}>NET CASH FLOW</td>
-                                <td className={`py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-bold text-right whitespace-nowrap ${netCashFlow >= 0 ? "text-blue-900" : "text-red-900"}`}>
-                                  {formatCurrency(netCashFlow)}
-                                </td>
+                              <tr className="bg-gray-100 border-b border-gray-200">
+                                <td colSpan={5} className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-900">ARUS KAS DARI AKTIVITAS OPERASI</td>
+                              </tr>
+                              {operating.length === 0 ? (
+                                <tr className="bg-white border-b border-gray-200"><td colSpan={5} className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-500 italic">Belum ada data aktivitas operasi</td></tr>
+                              ) : operating.map((item: any, i: number) => (
+                                <tr key={`op-${i}`} className="bg-white hover:bg-gray-50 border-b border-gray-200">
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">{item.account_code || '-'}</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">{item.account_name || '-'}</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-right border-r border-gray-300 whitespace-nowrap">{formatCurrency(item.running_balance || 0)}</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-right border-r border-gray-300 whitespace-nowrap">-</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-right whitespace-nowrap">-</td>
+                                </tr>
+                              ))}
+
+                              <tr><td className="py-2" colSpan={5}></td></tr>
+                              <tr className="bg-gray-100 border-b border-gray-200">
+                                <td colSpan={5} className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-900">ARUS KAS DARI AKTIVITAS INVESTASI</td>
+                              </tr>
+                              {investing.length === 0 ? (
+                                <tr className="bg-white border-b border-gray-200"><td colSpan={5} className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-500 italic">Belum ada data aktivitas investasi</td></tr>
+                              ) : investing.map((item: any, i: number) => (
+                                <tr key={`inv-${i}`} className="bg-white hover:bg-gray-50 border-b border-gray-200">
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">{item.account_code || '-'}</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">{item.account_name || '-'}</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-right border-r border-gray-300 whitespace-nowrap">-</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-right border-r border-gray-300 whitespace-nowrap">{formatCurrency(item.running_balance || 0)}</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-right whitespace-nowrap">-</td>
+                                </tr>
+                              ))}
+
+                              <tr><td className="py-2" colSpan={5}></td></tr>
+                              <tr className="bg-gray-100 border-b border-gray-200">
+                                <td colSpan={5} className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-900">ARUS KAS DARI AKTIVITAS PENDANAAN</td>
+                              </tr>
+                              {financing.length === 0 ? (
+                                <tr className="bg-white border-b border-gray-200"><td colSpan={5} className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-500 italic">Belum ada data aktivitas pendanaan</td></tr>
+                              ) : financing.map((item: any, i: number) => (
+                                <tr key={`fin-${i}`} className="bg-white hover:bg-gray-50 border-b border-gray-200">
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">{item.account_code || '-'}</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">{item.account_name || '-'}</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-right border-r border-gray-300 whitespace-nowrap">-</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-right border-r border-gray-300 whitespace-nowrap">-</td>
+                                  <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-right whitespace-nowrap">{formatCurrency(item.running_balance || 0)}</td>
+                                </tr>
+                              ))}
+
+                              <tr><td className="py-2" colSpan={5}></td></tr>
+                              <tr className="bg-blue-50 border-t-2 border-blue-400">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-bold text-blue-900 border-r border-blue-300" colSpan={2}>NET CASH FLOW</td>
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-bold text-blue-900 text-right border-r border-blue-300 whitespace-nowrap">{formatCurrency(netCashFlow)}</td>
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-bold text-blue-900 text-right border-r border-blue-300 whitespace-nowrap">-</td>
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-bold text-blue-900 text-right whitespace-nowrap">-</td>
                               </tr>
                             </>
+                          ) : (
+                            <tr><td colSpan={5} className="py-12 text-center text-gray-500">Tidak ada data arus kas</td></tr>
                           )}
                         </tbody>
                       </table>
