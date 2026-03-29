@@ -121,7 +121,7 @@ export default function EditTransactionModal({
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
-          <DialogHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+          <DialogHeader className="bg-linear-to-r from-blue-600 to-blue-700 text-white p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-white/20 rounded-full">
@@ -162,7 +162,7 @@ export default function EditTransactionModal({
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
-          <DialogHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6">
+          <DialogHeader className="bg-linear-to-r from-red-600 to-red-700 text-white p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-white/20 rounded-full">
@@ -205,7 +205,7 @@ export default function EditTransactionModal({
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
-          <DialogHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+          <DialogHeader className="bg-linear-to-r from-blue-600 to-blue-700 text-white p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-white/20 rounded-full">
@@ -244,7 +244,7 @@ export default function EditTransactionModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
         {/* Header */}
-        <DialogHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+        <DialogHeader className="bg-linear-to-r from-blue-600 to-blue-700 text-white p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-white/20 rounded-full">

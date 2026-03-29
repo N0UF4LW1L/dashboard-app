@@ -89,7 +89,7 @@ export default function SimpleAccountSelect({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-[100] max-h-60 overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-100 max-h-60 overflow-hidden">
           {/* Search Input */}
           <div className="p-3 border-b border-gray-200">
             <div className="relative">
@@ -139,7 +139,7 @@ export default function SimpleAccountSelect({
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-[99]"
+          className="fixed inset-0 z-99"
           onClick={() => setIsOpen(false)}
         />
       )}
