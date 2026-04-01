@@ -38,7 +38,7 @@ export function useTabState() {
     
     // Trigger refetch for the new tab
     if (refetchCallbacks[newTab]) {
-      console.log(`Refetching data for tab: ${newTab}`);
+
       refetchCallbacks[newTab]();
     }
   };

@@ -49,7 +49,6 @@ export default function InventoryTableWrapper() {
   );
   const createMutation = useCreateInventory();
   const updateMutation = useUpdateInventory(editingItem?.id || '');
-  const updateStatusMutation = useUpdateInventory(''); // need dynamic ID
   const deleteMutation = useDeleteInventory();
   const queryClient = useQueryClient();
 
@@ -130,26 +129,7 @@ export default function InventoryTableWrapper() {
     }
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: 'pending' | 'verified') => {
-    try {
-      // Re-use update inventory mutation hook logic manually since the hook relies on ID passed at hook initialization, 
-      // but wait, we can just call the mutation. Actually, let's use the hook like the reference did or initialize it manually.
-      // Easiest is to initialize the hook properly, but since the hook is bound to ID in `useUpdateInventory(id)`, 
-      // I will just use `updateMutation` but wait, `updateMutation` uses `editingItem?.id`. 
-      // Let's create a generic mutate function or just update the backend manually.
-      // Because `updateStatusMutation` has no ID... In `use-inventory-mutations.ts`, `useUpdateInventory` takes an id.
-      // So I'll just change the data locally or re-init the query? It's better to modify `useUpdateInventory` to accept ID in mutate.
-      // Wait, let's just use `fetch` or `apiClient` directly for this one-off status if needed, 
-      // or modify `use-inventory-mutations.ts`. Actually, let's look at `use-inventory-mutations` again.
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
-  // Because the original hook takes `id` in hook init, we will use it
-  const handleEditItemSubmit = (payload: any) => {
-    handleUpdate(payload);
-  };
 
   return (
     <>
@@ -313,7 +293,7 @@ export default function InventoryTableWrapper() {
           open={!!editingItem}
           onOpenChange={(open) => !open && setEditingItem(null)}
           item={editingItem}
-          onSubmit={handleEditItemSubmit}
+          onSubmit={handleUpdate}
           isSubmitting={updateMutation.isPending}
         />
       )}

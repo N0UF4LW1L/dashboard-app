@@ -353,7 +353,6 @@ export default function AccountList({ accounts, onReorder, onEditAccount, onDele
           }))
         };
         await onReorder(reorderData);
-        console.log("Order updated successfully");
       } catch (error) {
         console.error("Failed to update order:", error);
         // Revert changes on error

@@ -12,7 +12,7 @@ interface LaporanTabProps {
 export default function LaporanTab({ registerRefetchCallback }: LaporanTabProps) {
   // Placeholder refetch function for reports
   const refetchReports = () => {
-    console.log("Refetching reports data...");
+
     // Add actual refetch logic here when reports API is implemented
   };
 

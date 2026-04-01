@@ -11,7 +11,6 @@ interface GetAccountsParams {
   q?: string;
   type?: string;
   level?: number;
-  is_connected_to_bank?: boolean;
   is_header?: boolean;
   parent_id?: string;
   sort_by?: string;
@@ -91,23 +90,7 @@ export const useGetHierarchicalAccounts = (options = {}) => {
   });
 };
 
-export const useGetBankAccountsWithBalance = (params: GetAccountsParams = {}, options = {}) => {
-  const getBankAccountsWithBalance = async () => {
-    const cleanParams = Object.fromEntries(
-      Object.entries(params).filter(([_, value]) => value !== undefined)
-    );
-    const { data } = await apiClient.get(`${baseEndpoint}/accounts/with-balance`, {
-      params: { ...cleanParams, is_connected_to_bank: true },
-    });
-    return normalizeListResponse(data);
-  };
 
-  return useQuery({
-    queryKey: ["realization", "accounts", "bank", "with-balance", params],
-    queryFn: getBankAccountsWithBalance,
-    ...options,
-  });
-};
 
 export const useCreateAccount = () => {
   const queryClient = useQueryClient();

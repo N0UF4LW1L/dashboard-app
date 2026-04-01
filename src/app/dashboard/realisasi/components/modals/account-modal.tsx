@@ -36,9 +36,6 @@ export default function AccountModal({
   };
 
 
-
-
-
   const handleSave = () => {
     onSave();
   };

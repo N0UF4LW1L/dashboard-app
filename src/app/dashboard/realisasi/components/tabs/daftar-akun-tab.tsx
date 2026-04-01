@@ -63,9 +63,7 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
     registerRefetchCallback("daftar-akun", refetchAccounts);
   }, [registerRefetchCallback, refetchAccounts]);
 
-  // Refetch data every time component mounts (when tab is clicked)
   useEffect(() => {
-    console.log("Daftar Akun tab mounted/activated, refetching data...");
     refetchAccounts();
   }, [refetchAccounts]);
 
@@ -101,7 +99,6 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
   };
 
   const handleEditAccount = (id: string) => {
-    console.log("handleEditAccount called with id:", id);
     setSelectedAccountId(id);
   };
 
@@ -109,7 +106,6 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
   useEffect(() => {
     if (accountByIdData && selectedAccountId) {
       const account = accountByIdData.data;
-      console.log("Account data loaded:", account);
       
       if (account) {
         setEditMode(selectedAccountId as string, {
@@ -120,9 +116,6 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
           is_header: account.is_header,
           sort_order: account.sort_order,
           parent_id: account.parent_id,
-          is_connected_to_bank: account.is_connected_to_bank,
-          bank_name: account.bank_name || "",
-          bank_account_number: account.bank_account_number || "",
           initial_balance: account.initial_balance,
           description: account.description || ""
         });
@@ -180,7 +173,6 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
   };
 
   const handleUpdateAccount = async (id: string, accountData: CreateAccountData) => {
-    console.log("handleUpdateAccount called with id:", id, "accountData:", accountData);
     try {
       await updateAccountMutation.mutateAsync({ id, body: accountData });
       await Swal.fire({

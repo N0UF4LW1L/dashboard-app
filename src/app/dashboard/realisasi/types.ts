@@ -18,10 +18,7 @@ export interface Account {
   is_active: boolean;
   sort_order: number;
   is_header: boolean;
-  is_connected_to_bank: boolean;
   is_default: boolean;
-  bank_name?: string | null;
-  bank_account_number?: string | null;
   initial_balance: number;
   parent_id?: string | null;
   description?: string | null;
@@ -86,9 +83,6 @@ export interface CreateAccountData {
   is_header?: boolean;
   sort_order?: number;
   parent_id?: string;
-  is_connected_to_bank?: boolean;
-  bank_name?: string;
-  bank_account_number?: string;
   initial_balance?: number;
   description?: string;
 }

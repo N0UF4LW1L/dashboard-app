@@ -98,7 +98,7 @@ export default function TransactionList({
 
   const refetch = () => {
     // This will be handled by the parent component
-    console.log("Refetch data");
+
   };
 
 
@@ -161,7 +161,7 @@ export default function TransactionList({
 
   const handleEditTransaction = (id: string, data: any) => {
     // TODO: Implement edit transaction logic
-    console.log('Edit transaction:', id, data);
+
   };
 
   // Convert FinancialTransaction to TransactionItem format
