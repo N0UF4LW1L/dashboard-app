@@ -25,38 +25,52 @@ export const navItems: NavItem[] = [
     {
         title: 'PESANAN',
         label: 'orders',
-        roles: ['admin'],
+        roles: ['admin', 'finance'],
         items: [
             {
                 title: 'Pesanan Kendaraan',
                 href: '/dashboard/orders',
                 icon: 'car',
                 label: 'orders',
-                roles: ['admin'],
+                roles: ['admin', 'finance'],
             },
         ],
     },
     {
         title: 'KATALOG',
-        label: 'catalog',
+        label: 'katalog',
         roles: ['admin'],
         items: [
             {
-                title: 'Kendaraan',
+                title: 'Fleets',
                 href: '/dashboard/vehicles',
-                icon: 'truck',
+                icon: 'car',
                 label: 'vehicles',
                 roles: ['admin'],
             },
+        ],
+    },
+    {
+        title: 'CUSTOMER MANAGEMENT',
+        label: 'customer',
+        roles: ['admin'],
+        items: [
             {
-                title: 'Pelanggan',
+                title: 'Customers',
                 href: '/dashboard/customers',
                 icon: 'users',
-                label: 'customers',
+                label: 'Customers',
                 roles: ['admin'],
             },
+        ],
+    },
+    {
+        title: 'SYSTEM OPERATIONAL',
+        label: 'system-operational',
+        roles: ['admin'],
+        items: [
             {
-                title: 'Lokasi',
+                title: 'Location',
                 href: '/dashboard/location',
                 icon: 'home',
                 label: 'location',
@@ -69,19 +83,26 @@ export const navItems: NavItem[] = [
                 label: 'addons',
                 roles: ['admin'],
             },
+        ],
+    },
+    {
+        title: 'OPERATIONAL',
+        label: 'operational',
+        roles: ['admin', 'finance', 'driver'],
+        items: [
             {
-                title: 'Inventaris',
-                href: '/dashboard/inventory',
-                icon: 'clipboardList',
-                label: 'inventory',
-                roles: ['admin'],
+                title: 'Reimburse',
+                href: '/dashboard/reimburse',
+                icon: 'hand',
+                label: 'reimburse',
+                roles: ['admin', 'finance','driver'],
             },
         ],
     },
     {
-        title: 'FITUR TAMBAHAN',
-        label: 'extra',
-        roles: ['admin', 'finance', 'driver'],
+        title: 'FINANCIAL MANAGEMENT',
+        label: 'financial-management',
+        roles: ['admin', 'finance'],
         items: [
             {
                 title: 'Rekap Pencatatan',
@@ -89,6 +110,13 @@ export const navItems: NavItem[] = [
                 icon: 'fileText',
                 label: 'rekap-pencatatan',
                 roles: ['admin', 'finance'],
+            },
+            {
+                title: 'Inventaris',
+                href: '/dashboard/inventory',
+                icon: 'clipboardList',
+                label: 'inventory',
+                roles: ['admin'],
             },
             {
                 title: 'Realisasi',
@@ -103,13 +131,6 @@ export const navItems: NavItem[] = [
                 icon: 'chart',
                 label: 'perencanaan',
                 roles: ['admin', 'finance'],
-            },
-            {
-                title: 'Reimburse',
-                href: '/dashboard/reimburse',
-                icon: 'hand',
-                label: 'reimburse',
-                roles: ['admin', 'driver'],
             },
         ],
     },
