@@ -18,12 +18,18 @@ export const RekapOrderanSewaForm: React.FC<OrderanSewaDetailProps> = ({ data })
   const title = "Detail Orderan Fleets";
   const description = "Detail lengkap transaksi orderan sewa kendaraan";
   const discount = data.price_calculation?.discount_percentage ?? 0;
-  const additionalServicesTotal = Array.isArray(data.additional_services)
-    ? data.additional_services.reduce(
-        (sum: number, item: any) => sum + (Number(item?.price) || 0),
-        0,
-      )
-    : 0;
+
+  // Additional services dari field additional_services (array of {description, price})
+  const additionalServices: { description: string; price: number }[] = Array.isArray(data.additional_services)
+    ? data.additional_services
+    : [];
+  const additionalServicesTotal = additionalServices.reduce(
+    (sum, item) => sum + (Number(item?.price) || 0),
+    0,
+  );
+
+  // Addons price dari field addons_price di root
+  const addonsPrice = Number(data.addons_price ?? data.price_calculation?.addons_price ?? 0);
 
   return (
     <>
@@ -115,14 +121,14 @@ export const RekapOrderanSewaForm: React.FC<OrderanSewaDetailProps> = ({ data })
           </div>
           <div>
             <Label>Layanan Add-Ons</Label>
-            <Input disabled value={formatRupiah(data.addons_price ?? 0)} className="disabled:opacity-90 mt-2" />
+            <Input disabled value={formatRupiah(addonsPrice)} className="disabled:opacity-90 mt-2" />
           </div>
         </div>
 
         {/* Row 6 */}
         <div className="md:grid md:grid-cols-3 gap-8">
           <div>
-            <Label>Layanan Lainnya</Label>
+            <Label>Layanan Lainnya (Total)</Label>
             <Input disabled value={formatRupiah(additionalServicesTotal)} className="disabled:opacity-90 mt-2" />
           </div>
           <div>
@@ -134,6 +140,25 @@ export const RekapOrderanSewaForm: React.FC<OrderanSewaDetailProps> = ({ data })
             <Input disabled value={data.invoice_number || "-"} className="disabled:opacity-90 mt-2" />
           </div>
         </div>
+
+        {/* Layanan Lainnya Detail */}
+        {additionalServices.length > 0 && (
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Detail Layanan Lainnya</Label>
+            <div className="border rounded-md divide-y">
+              {additionalServices.map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center px-4 py-3">
+                  <span className="text-sm font-medium">{item.description || `Item ${idx + 1}`}</span>
+                  <span className="text-sm font-semibold">{formatRupiah(Number(item.price) || 0)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center px-4 py-3 bg-muted/30">
+                <span className="text-sm font-semibold">Total Layanan Lainnya</span>
+                <span className="text-sm font-semibold">{formatRupiah(additionalServicesTotal)}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Row 7: Status */}
         <div className="flex justify-center">
@@ -154,3 +179,5 @@ export const RekapOrderanSewaForm: React.FC<OrderanSewaDetailProps> = ({ data })
     </>
   );
 };
+
+

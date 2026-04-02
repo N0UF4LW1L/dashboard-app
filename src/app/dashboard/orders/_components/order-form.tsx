@@ -36,7 +36,7 @@ interface Order {
     insuranceFee: number;
     pickupFee?: number;
     isWithDriver?: boolean;
-    additionalItems?: string;
+    additionalItems?: { description: string; price: number }[];
     discount?: number;
     paymentStatus: string;
 }
@@ -91,10 +91,19 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         insuranceFee: initialData?.insuranceFee?.toString() || '',
         pickupFee: initialData?.pickupFee?.toString() || '',
         isWithDriver: initialData?.isWithDriver || false,
-        additionalItems: initialData?.additionalItems || '',
         discount: initialData?.discount?.toString() || '',
         paymentStatus: initialData?.paymentStatus || 'Belum Lunas',
     });
+
+    // Additional service items state
+    const [additionalServiceItems, setAdditionalServiceItems] = useState<{ description: string; price: string }[]>(
+        Array.isArray(initialData?.additionalItems)
+            ? initialData.additionalItems.map((item: any) => ({
+                description: item.description || '',
+                price: item.price?.toString() || ''
+              }))
+            : []
+    );
 
     const [selectedAddons, setSelectedAddons] = useState<{ addonId: string, quantity: number }[]>(
         // @ts-ignore
@@ -133,6 +142,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         });
         if (addonError) return;
 
+        const additionalItemsPayload = additionalServiceItems
+            .filter(item => item.description.trim() || Number(item.price) > 0)
+            .map(item => ({ description: item.description.trim(), price: Number(item.price) || 0 }));
+
         const payload: CreateOrderPayload = {
             customerId: form.customerId,
             vehicleId: form.vehicleId,
@@ -142,7 +155,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
             insuranceFee: Number(form.insuranceFee),
             pickupFee: form.pickupFee ? Number(form.pickupFee) : undefined,
             isWithDriver: form.isWithDriver,
-            additionalItems: form.additionalItems || undefined,
+            additionalItems: additionalItemsPayload.length > 0 ? additionalItemsPayload : undefined,
             discount: form.discount ? Number(form.discount) : undefined,
             paymentStatus: form.paymentStatus,
             addons: selectedAddons,
@@ -170,10 +183,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         return sum + ((addon?.price || 0) * item.quantity);
     }, 0);
 
+    const additionalServicesCost = additionalServiceItems.reduce((sum, item) => {
+        return sum + (Number(item.price) || 0);
+    }, 0);
+
     const locationFee = form.usageArea === 'Luar Kota' ? 100000 : 0;
     const insuranceFee = Number(form.insuranceFee) || 0;
     const pickupFee = Number(form.pickupFee) || 0;
-    const totalCost = rentalCost + locationFee + insuranceFee + pickupFee + addonsCost;
+    const totalCost = rentalCost + locationFee + insuranceFee + pickupFee + addonsCost + additionalServicesCost;
 
     const availableAddons = allAddons.filter(a => a.stock > 0 && selectedVehicle && a.category === selectedVehicle.type);
 
@@ -485,15 +502,73 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                             )}
                         </div>
 
-                        {/* Addons */}
-                        <div className="space-y-2 md:col-span-2">
-                            <Label>Catatan / Item Tambahan (opsional)</Label>
-                            <Input
-                                placeholder="Misal: Extra driver, tambahan baby seat"
-                                value={form.additionalItems ?? ''}
-                                onChange={(e) => setForm((f) => ({ ...f, additionalItems: e.target.value }))}
-                                disabled={isPending}
-                            />
+                        {/* Layanan Tambahan - Dynamic List */}
+                        <div className="space-y-3 md:col-span-2">
+                            <Label className="text-base font-semibold">Layanan Tambahan <span className="text-muted-foreground font-normal text-sm">(opsional)</span></Label>
+
+                            {additionalServiceItems.length > 0 && (
+                                <div className="space-y-2">
+                                    {additionalServiceItems.map((item, idx) => (
+                                        <div key={idx} className="flex gap-2 items-start">
+                                            <div className="flex-1">
+                                                <Label className="text-xs text-muted-foreground mb-1 block">Deskripsi Layanan <span className="text-red-500">*</span></Label>
+                                                <Input
+                                                    placeholder="Deskripsi Layanan"
+                                                    value={item.description}
+                                                    onChange={(e) => {
+                                                        const arr = [...additionalServiceItems];
+                                                        arr[idx].description = e.target.value;
+                                                        setAdditionalServiceItems(arr);
+                                                    }}
+                                                    disabled={isPending}
+                                                />
+                                            </div>
+                                            <div className="w-48">
+                                                <Label className="text-xs text-muted-foreground mb-1 block">Harga Layanan <span className="text-red-500">*</span></Label>
+                                                <div className="flex items-center gap-1">
+                                                    <Input
+                                                        type="number"
+                                                        min="0"
+                                                        placeholder="0"
+                                                        value={item.price}
+                                                        onChange={(e) => {
+                                                            const arr = [...additionalServiceItems];
+                                                            arr[idx].price = e.target.value;
+                                                            setAdditionalServiceItems(arr);
+                                                        }}
+                                                        disabled={isPending}
+                                                        className="flex-1"
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        disabled={isPending}
+                                                        onClick={() => {
+                                                            setAdditionalServiceItems(additionalServiceItems.filter((_, i) => i !== idx));
+                                                        }}
+                                                        className="h-9 w-9 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
+                                                    >
+                                                        <Trash className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="flex justify-end">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={isPending}
+                                    onClick={() => setAdditionalServiceItems([...additionalServiceItems, { description: '', price: '' }])}
+                                >
+                                    + Add Item
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -583,6 +658,20 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                                                 </div>
                                             )
                                         })}
+                                    </>
+                                )}
+
+                                {additionalServiceItems.filter(i => Number(i.price) > 0 || i.description).length > 0 && (
+                                    <>
+                                        <p className="font-medium text-sm text-neutral-700 mb-1 mt-2">Layanan Tambahan</p>
+                                        {additionalServiceItems.map((item, idx) => (
+                                            (item.description || Number(item.price) > 0) && (
+                                                <div key={idx} className="flex justify-between mb-1">
+                                                    <p className="font-medium text-sm text-neutral-700 truncate max-w-[140px]">{item.description || `Item ${idx + 1}`}</p>
+                                                    <p className="font-semibold text-base">{formatRupiah(Number(item.price) || 0)}</p>
+                                                </div>
+                                            )
+                                        ))}
                                     </>
                                 )}
 
