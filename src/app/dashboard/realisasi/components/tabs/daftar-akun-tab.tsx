@@ -1,5 +1,7 @@
 "use client";
 
+import * as XLSX from 'xlsx';
+
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -141,6 +143,62 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
     }
   };
 
+  const handleExportAccounts = () => {
+    try {
+      if (!treeData || treeData.length === 0) {
+        toast.error("Tidak ada data akun untuk diekspor");
+        return;
+      }
+
+      // Flatten tree data specifically for export
+      const flattenDataForExport = (accounts: any[], result: any[] = []) => {
+        accounts.forEach(account => {
+          result.push({
+            'Kode Akun': account.code,
+            'Nama Akun': account.name,
+            'Tipe': account.type,
+            'Kategori': account.is_header ? 'Header' : 'Sub-Akun',
+            'Level': account.level,
+            'Saldo Awal': account.initial_balance || 0,
+            'Penanda': account.is_default ? 'Default' : '-',
+            'Deskripsi': account.description || '-'
+          });
+          if (account.children && account.children.length > 0) {
+            flattenDataForExport(account.children, result);
+          }
+        });
+        return result;
+      };
+
+      const dataToExport = flattenDataForExport(treeData);
+
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Daftar Akun");
+      
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Format date for filename: YYYY-MM-DD
+      const dateStr = new Date().toISOString().split('T')[0];
+      link.download = `rekap_akun_${dateStr}.xlsx`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Berhasil mengunduh rekap akun");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Gagal mengunduh rekap akun");
+    }
+  };
+
   const handleCreateAccount = async (accountData: CreateAccountData) => {
     try {
       await createAccountMutation.mutateAsync(accountData);
@@ -264,7 +322,7 @@ export default function DaftarAkunTab({ registerRefetchCallback }: DaftarAkunTab
         </div>
         
         <div className="flex items-center space-x-3">
-          <Button variant="outline" className="flex items-center space-x-2">
+          <Button variant="outline" className="flex items-center space-x-2" onClick={handleExportAccounts}>
             <Cloud className="h-4 w-4" />
             <span>Rekap Akun</span>
           </Button>
