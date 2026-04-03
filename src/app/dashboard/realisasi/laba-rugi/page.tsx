@@ -23,7 +23,7 @@ import * as XLSX from 'xlsx';
 
 const breadcrumbItems = [
   { title: "Realisasi", link: "/dashboard/realisasi" },
-  { title: "Laba Rugi", link: "/dashboard/realisasi/laporan-keuangan/laba-rugi" }
+  { title: "Laba Rugi", link: "/dashboard/realisasi/laba-rugi" }
 ];
 
 export default function LabaRugiPage() {
@@ -256,6 +256,18 @@ export default function LabaRugiPage() {
     );
   }
 
+  // Filter data based on search query
+  const filterAccounts = (accounts: any[]) => {
+    if (!searchQuery.trim()) return accounts;
+    return accounts.filter((account: any) =>
+      (account.account_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (account.account_code || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
+  const filteredRevenueAccounts = filterAccounts(labaRugiData?.revenue?.accounts || []);
+  const filteredExpenseAccounts = filterAccounts(labaRugiData?.expenses?.accounts || []);
+
   return (
     <>
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -382,8 +394,8 @@ export default function LabaRugiPage() {
                           </tr>
                           
                           {/* Data PENDAPATAN (putih) */}
-                          {labaRugiData.revenue?.accounts?.length > 0 ? (
-                            labaRugiData.revenue.accounts.map((item: any, index: number) => (
+                          {filteredRevenueAccounts.length > 0 ? (
+                            filteredRevenueAccounts.map((item: any, index: number) => (
                               <tr key={`income-${index}`} className="bg-white hover:bg-gray-50 border-b border-gray-200">
                                 <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">
                                   {item.account_code || '-'}
@@ -402,7 +414,7 @@ export default function LabaRugiPage() {
                           ) : (
                             <tr className="bg-white border-b border-gray-200">
                               <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-500 italic border-r border-gray-300" colSpan={4}>
-                                Belum ada data pendapatan
+                                {searchQuery.trim() ? 'Tidak ada data pendapatan yang sesuai dengan pencarian' : 'Belum ada data pendapatan'}
                               </td>
                             </tr>
                           )}
@@ -425,8 +437,8 @@ export default function LabaRugiPage() {
                           </tr>
                           
                           {/* Data BEBAN (putih) */}
-                          {labaRugiData.expenses?.accounts?.length > 0 ? (
-                            labaRugiData.expenses.accounts.map((item: any, index: number) => (
+                          {filteredExpenseAccounts.length > 0 ? (
+                            filteredExpenseAccounts.map((item: any, index: number) => (
                               <tr key={`expense-${index}`} className="bg-white hover:bg-gray-50 border-b border-gray-200">
                                 <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-700 border-r border-gray-300">
                                   {item.account_code || '-'}
@@ -445,7 +457,7 @@ export default function LabaRugiPage() {
                           ) : (
                             <tr className="bg-white border-b border-gray-200">
                               <td className="py-2 px-2 sm:px-4 text-xs sm:text-sm text-gray-500 italic border-r border-gray-300" colSpan={4}>
-                                Belum ada data beban
+                                {searchQuery.trim() ? 'Tidak ada data beban yang sesuai dengan pencarian' : 'Belum ada data beban'}
                               </td>
                             </tr>
                           )}

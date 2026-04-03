@@ -48,7 +48,7 @@ export default function InventoryTableWrapper() {
     endDate || undefined
   );
   const createMutation = useCreateInventory();
-  const updateMutation = useUpdateInventory(editingItem?.id || '');
+  const updateMutation = useUpdateInventory();
   const deleteMutation = useDeleteInventory();
   const queryClient = useQueryClient();
 
@@ -121,7 +121,7 @@ export default function InventoryTableWrapper() {
   const handleUpdate = async (payload: any) => {
     if (!editingItem) return;
     try {
-      await updateMutation.mutateAsync(payload);
+      await updateMutation.mutateAsync({ id: editingItem.id, payload });
       toast.success('Inventaris berhasil diupdate');
       setEditingItem(null);
     } catch (error) {

@@ -18,7 +18,7 @@ import * as XLSX from 'xlsx';
 
 const breadcrumbItems = [
   { title: "Realisasi", link: "/dashboard/realisasi" },
-  { title: "Neraca Saldo", link: "/dashboard/realisasi/laporan-keuangan/neraca" }
+  { title: "Neraca", link: "/dashboard/realisasi/neraca" }
 ];
 
 export default function NeracaPage() {

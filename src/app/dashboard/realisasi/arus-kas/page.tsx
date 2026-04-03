@@ -18,7 +18,7 @@ import * as XLSX from 'xlsx';
 
 const breadcrumbItems = [
   { title: "Realisasi", link: "/dashboard/realisasi" },
-  { title: "Arus Kas", link: "/dashboard/realisasi/laporan-keuangan/arus-kas" }
+  { title: "Arus Kas", link: "/dashboard/realisasi/arus-kas" }
 ];
 
 export default function ArusKasPage() {

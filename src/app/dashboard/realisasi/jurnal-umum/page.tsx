@@ -21,7 +21,7 @@ import { useMemo } from "react";
 
 const breadcrumbItems = [
   { title: "Realisasi", link: "/dashboard/realisasi" },
-  { title: "Jurnal Umum", link: "/dashboard/realisasi/laporan-keuangan/jurnal-umum" }
+  { title: "Jurnal Umum", link: "/dashboard/realisasi/jurnal-umum" }
 ];
 
 // Helper function to convert API response to JurnalUmumRowItem format for merged cell
