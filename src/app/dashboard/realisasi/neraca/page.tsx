@@ -500,7 +500,7 @@ export default function NeracaPage() {
                         )}
                         
                         {/* TOTAL AKTIVA */}
-                        <tr className="bg-gray-100 border-t-2 border-gray-400 border-b border-gray-200">
+                        <tr className="bg-gray-100 border-t-2 border-gray-400">
                           <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-900 border-r border-gray-300" colSpan={2}>
                             TOTAL AKTIVA
                           </td>

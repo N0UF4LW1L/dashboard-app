@@ -473,7 +473,7 @@ export default function LabaRugiPage() {
                           </tr>
                           
                           {/* LABA BERSIH - Header (abu-abu) */}
-                          <tr className="bg-gray-100 border-t-2 border-gray-400 border-b border-gray-200">
+                          <tr className="bg-gray-100 border-t-2 border-gray-400 border-b">
                             <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-bold text-gray-900 text-center border-r border-gray-300" colSpan={3}>
                               LABA BERSIH
                             </td>
