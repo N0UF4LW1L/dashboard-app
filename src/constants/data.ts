@@ -125,13 +125,13 @@ export const navItems: NavItem[] = [
                 label: 'realisasi',
                 roles: ['admin', 'finance'],
             },
-            {
-                title: 'Perencanaan',
-                href: '/dashboard/perencanaan',
-                icon: 'chart',
-                label: 'perencanaan',
-                roles: ['admin', 'finance'],
-            },
+            // {
+            //     title: 'Perencanaan',
+            //     href: '/dashboard/perencanaan',
+            //     icon: 'chart',
+            //     label: 'perencanaan',
+            //     roles: ['admin', 'finance'],
+            // },
         ],
     },
 ];
