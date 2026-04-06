@@ -12,7 +12,7 @@ export interface CreateOrderPayload {
     insuranceFee: number;
     pickupFee?: number;
     isWithDriver?: boolean;
-    additionalItems?: string;
+    additionalItems?: { description: string; price: number }[];
     paymentStatus?: string; // 'Lunas' | 'Belum Lunas'
     discount?: number;
     addons?: { addonId: string; quantity: number }[];
@@ -27,7 +27,7 @@ export interface UpdateOrderPayload {
     insuranceFee?: number;
     pickupFee?: number;
     isWithDriver?: boolean;
-    additionalItems?: string;
+    additionalItems?: { description: string; price: number }[];
     paymentStatus?: string;
     isReturned?: boolean;
     discount?: number;

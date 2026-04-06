@@ -13,7 +13,7 @@ export const useGetInventories = (search?: string, startDate?: string, endDate?:
             if (startDate) params.startDate = startDate;
             if (endDate) params.endDate = endDate;
             const { data } = await apiClient.get('/inventories', { params });
-            // Handle kedua shape: array (lama) atau {items, meta} (baru)
+            // Normalize response: support both array and paginated format
             if (Array.isArray(data)) return data as any[];
             return (data?.items ?? []) as any[];
         },

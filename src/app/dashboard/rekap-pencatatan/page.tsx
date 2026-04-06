@@ -22,8 +22,7 @@ export default function RekapPencatatanPage() {
           <Heading title="Rekap Pencatatan" description="Kelola dan pantau rekap keuangan harian maupun bulanan" />
         </div>
         <Separator />
-        
-        {/* Force Turbopack Cache Invalidation */}
+
         <RekapPencatatanTableWrapper />
       </div>
     </>

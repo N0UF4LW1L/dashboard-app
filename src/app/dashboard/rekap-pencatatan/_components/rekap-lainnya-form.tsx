@@ -7,9 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useGetTransactionCategories } from '@/hooks/api/useRealization';
+
 interface RekapLainnyaFormData {
   name: string;
   category: string;
+  categoryName: string; // To keep category label context optionally
+  rawCategory?: any; // To hold full category object
   nominal: number | '';
   date: string;
   description: string;
@@ -27,9 +32,14 @@ export function RekapLainnyaForm({ open, onOpenChange, onSubmit, initialData, is
   const [formData, setFormData] = useState<RekapLainnyaFormData>({
     name: '',
     category: '',
+    categoryName: '',
     nominal: '',
     date: new Date().toISOString().split('T')[0],
     description: '',
+  });
+
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useGetTransactionCategories({ 
+    page: 1, limit: 1000, is_active: true 
   });
 
   useEffect(() => {
@@ -37,6 +47,7 @@ export function RekapLainnyaForm({ open, onOpenChange, onSubmit, initialData, is
       setFormData({
         name: initialData.name || '',
         category: initialData.category || '',
+        categoryName: initialData.categoryName || '',
         nominal: initialData.nominal || '',
         date: initialData.date ? initialData.date.split('T')[0] : new Date().toISOString().split('T')[0],
         description: initialData.description || '',
@@ -45,6 +56,7 @@ export function RekapLainnyaForm({ open, onOpenChange, onSubmit, initialData, is
       setFormData({
         name: '',
         category: '',
+        categoryName: '',
         nominal: '',
         date: new Date().toISOString().split('T')[0],
         description: '',
@@ -62,7 +74,9 @@ export function RekapLainnyaForm({ open, onOpenChange, onSubmit, initialData, is
 
     const payload = {
         name: formData.name.trim(),
-        category: formData.category.trim(),
+        category: formData.category, // id string of category
+        categoryName: formData.categoryName, // the name 
+        rawCategory: formData.rawCategory,
         nominal: Number(formData.nominal),
         date: formData.date,
         description: formData.description.trim() || undefined,
@@ -94,14 +108,31 @@ export function RekapLainnyaForm({ open, onOpenChange, onSubmit, initialData, is
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Kategori *</Label>
-            <Input
-              id="category"
-              placeholder="Contoh: Operasional"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              disabled={isSubmitting}
-            />
+            <Label htmlFor="category">Kategori Realisasi *</Label>
+            <Select 
+              value={formData.category} 
+              onValueChange={(value) => {
+                const selectedCat = categoriesData?.items?.find((c: any) => c.id === value);
+                setFormData({ 
+                  ...formData, 
+                  category: value, 
+                  categoryName: selectedCat?.name || value,
+                  rawCategory: selectedCat
+                });
+              }}
+              disabled={isSubmitting || isCategoriesLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={isCategoriesLoading ? "Memuat kategori..." : "Pilih Kategori"} />
+              </SelectTrigger>
+              <SelectContent>
+                {categoriesData?.items?.map((cat: any) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

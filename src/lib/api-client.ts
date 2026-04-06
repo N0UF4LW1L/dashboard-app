@@ -11,7 +11,15 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
     (config) => {
         if (typeof window !== 'undefined') {
-            const token = localStorage.getItem('access_token');
+            let token = localStorage.getItem('access_token');
+            if (!token) {
+                // Fallback cek cookie
+                const match = document.cookie.match(/(?:^|; )access_token=([^;]*)/);
+                if (match) {
+                    token = match[1];
+                    localStorage.setItem('access_token', token); // Sync ke localStorage
+                }
+            }
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }

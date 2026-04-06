@@ -45,16 +45,16 @@ export const useCreateInventory = () => {
 };
 
 /** Update inventaris */
-export const useUpdateInventory = (id: string) => {
+export const useUpdateInventory = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (payload: UpdateInventoryPayload) => {
+        mutationFn: async ({ id, payload }: { id: string; payload: UpdateInventoryPayload }) => {
             const { data } = await apiClient.patch(`/inventories/${id}`, payload);
             return data as Inventory;
         },
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['inventories'] });
-            queryClient.invalidateQueries({ queryKey: ['inventories', id] });
+            queryClient.invalidateQueries({ queryKey: ['inventories', variables.id] });
         },
     });
 };

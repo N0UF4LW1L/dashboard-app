@@ -9,7 +9,7 @@ export const useGetVehicles = () => {
         queryKey: ['vehicles'],
         queryFn: async () => {
             const { data } = await apiClient.get('/vehicles');
-            return data as any[];
+            return (data?.items || data?.data || data || []) as any[];
         },
         enabled: typeof window !== 'undefined' && !!localStorage.getItem('access_token'),
     });
@@ -21,7 +21,7 @@ export const useGetVehicleById = (id: string) => {
         queryKey: ['vehicles', id],
         queryFn: async () => {
             const { data } = await apiClient.get(`/vehicles/${id}`);
-            return data as any;
+            return data?.data || data as any;
         },
         enabled:
             typeof window !== 'undefined' &&
@@ -36,7 +36,7 @@ export const useVehiclesStatusCount = () => {
         queryKey: ['vehicles', 'status-count'],
         queryFn: async () => {
             const { data } = await apiClient.get('/vehicles');
-            const vehicles = data as any[];
+            const vehicles = (data?.items || data?.data || data || []) as any[];
             const available = vehicles.filter((v) => v.isAvailable).length;
             const unavailable = vehicles.filter((v) => !v.isAvailable).length;
             return {

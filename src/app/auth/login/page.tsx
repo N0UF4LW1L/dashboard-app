@@ -92,6 +92,7 @@ function LoginFormContent() {
             {
                 onSuccess: (data) => {
                     document.cookie = `access_token=${data.access_token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+                    localStorage.setItem('access_token', data.access_token);
                     if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
                     router.push(DEFAULT_ROUTE[selectedRole.key]);
                 },
