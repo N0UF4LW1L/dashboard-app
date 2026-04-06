@@ -34,10 +34,10 @@ function RealisasiContent() {
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="daftar-akun">Daftar Akun</TabsTrigger>
+            <TabsTrigger value="kategori">Kategori</TabsTrigger>
             <TabsTrigger value="buku-besar">Buku Besar</TabsTrigger>
             <TabsTrigger value="transaksi">Transaksi</TabsTrigger>
             <TabsTrigger value="laporan">Laporan</TabsTrigger>
-            <TabsTrigger value="kategori">Kategori</TabsTrigger>
           </TabsList>
 
           {/* Daftar Akun Tab */}
