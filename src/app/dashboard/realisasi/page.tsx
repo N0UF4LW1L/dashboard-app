@@ -45,6 +45,11 @@ function RealisasiContent() {
             <DaftarAkunTab registerRefetchCallback={registerRefetchCallback} />
           </TabsContent>
 
+          {/* Kategori Tab */}
+          <TabsContent value="kategori" className="space-y-4">
+            <KategoriTab registerRefetchCallback={registerRefetchCallback} />
+          </TabsContent>
+
           {/* Buku Besar Tab */}
           <TabsContent value="buku-besar" className="space-y-4">
             <BukuBesarTab registerRefetchCallback={registerRefetchCallback} />
@@ -58,11 +63,6 @@ function RealisasiContent() {
           {/* Laporan Tab */}
           <TabsContent value="laporan" className="space-y-4">
             <LaporanTab registerRefetchCallback={registerRefetchCallback} />
-          </TabsContent>
-
-          {/* Kategori Tab */}
-          <TabsContent value="kategori" className="space-y-4">
-            <KategoriTab registerRefetchCallback={registerRefetchCallback} />
           </TabsContent>
         </Tabs>
       </div>
