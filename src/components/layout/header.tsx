@@ -13,7 +13,7 @@ export default function Header() {
 
                 <div className="hidden lg:block">
                     <Link href="/dashboard">
-                        <span className="font-bold text-xl text-[#1F61D9]">TransGo</span>
+                        <span className="font-bold text-xl text-[#1F61D9]">Dashboard TransGo</span>
                     </Link>
                 </div>
 
